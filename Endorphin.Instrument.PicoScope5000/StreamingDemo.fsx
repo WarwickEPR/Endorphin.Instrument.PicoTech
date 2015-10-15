@@ -1,4 +1,7 @@
 ﻿#r "../Endorphin.Core/bin/Debug/Endorphin.Core.dll"
+#r "../packages/Rx-Core.2.2.5/lib/net45/System.Reactive.Core.dll"
+#r "../packages/Rx-Interfaces.2.2.5/lib/net45/System.Reactive.Interfaces.dll"
+#r "../packages/Rx-Linq.2.2.5/lib/net45/System.Reactive.Linq.dll"
 #r "../packages/FSharp.Control.Reactive.3.2.0/lib/net40/FSharp.Control.Reactive.dll"
 #r "../packages/FSharp.Charting.0.90.12/lib/net40/FSharp.Charting.dll"
 #r "bin/Debug/Endorphin.Instrument.PicoScope5000.dll"
@@ -24,48 +27,42 @@ form.Closed |> Observable.add (fun _ -> cts.Cancel())
 
 let streamingParameters = 
     // define the streaming parameters: 14 bit resolution, 20 ms sample interval, 64 kSample bufffer
-    Streaming.Parameters.create Resolution_14bit (Interval.fromMilliseconds 20<ms>) (64u * 1024u)
+    Streaming.Parameters.create Resolution_14bit (Interval.fromMicroseconds 100<us>) (64u * 1024u)
     |> Streaming.Parameters.enableChannel ChannelA DC Range_500mV Voltage.zero FullBandwidth
-    |> Streaming.Parameters.enableChannel ChannelB DC Range_2V Voltage.zero Bandwidth_20MHz
-    |> Streaming.Parameters.sampleChannels [ ChannelA ; ChannelB ] NoDownsampling
-    |> Streaming.Parameters.withAutoStop 0u 500u // acquire 500 samples after the trigger (approximately 10s)
+    |> Streaming.Parameters.sampleChannel ChannelA Averaged
+    |> Streaming.Parameters.withDownsamplingRatio 200u
 
 let showTimeChart acquisition = async {
     do! Async.SwitchToContext uiContext // add the chart to the form using the UI thread context
-        
+    
+    let initialTime = DateTime.Now    
+
+    let picoBlock = 
+        Streaming.Signal.voltageByBlock (ChannelA, AveragedBuffer) acquisition
+        |> Observable.map (fun samples -> Array.average samples)
+
     let chart = 
-        Chart.Combine [ 
-            Streaming.Signal.voltageByTime (ChannelA, NoDownsamplingBuffer) acquisition
-            |> Observable.observeOnContext uiContext
-            |> LiveChart.FastLineIncremental
+        picoBlock
+        |> Observable.map (fun sample -> Seq.singleton ("Channel A", sample))
+        |> Observable.observeOnContext uiContext
+        |> LiveChart.Bar
+        |> Chart.WithYAxis (Min = -0.005, Max = 0.005, Title = "Voltage")
 
-            Streaming.Signal.voltageByTime (ChannelB, NoDownsamplingBuffer) acquisition
-            |> Observable.observeOnContext uiContext
-            |> LiveChart.FastLineIncremental ]
-        |> Chart.WithXAxis(Title = "Time")
-        |> Chart.WithYAxis(Title = "Voltage")
+    let timeChart =
+        picoBlock
+        |> Observable.bufferCountOverlapped 264
+        |> Observable.map (Array.mapi (fun i x -> (i, x) ))
+        |> Observable.observeOnContext uiContext
+        |> LiveChart.FastLine
 
-    new ChartTypes.ChartControl(chart, Dock = DockStyle.Fill)
+    //new ChartTypes.ChartControl(chart, Dock = DockStyle.Fill)
+    //|> form.Controls.Add
+
+    new ChartTypes.ChartControl(timeChart, Dock = DockStyle.Fill)
     |> form.Controls.Add
     
     // return to the thread pool context
     do! Async.SwitchToThreadPool() }
-
-let showChartXY acquisition = async {
-    do! Async.SwitchToContext uiContext // add the chart to the form using the UI thread context
-
-    let chartXY =
-        Streaming.Signal.voltageXY (ChannelA, NoDownsamplingBuffer) (ChannelB, NoDownsamplingBuffer) acquisition
-        |> Observable.observeOnContext uiContext
-        |> LiveChart.FastLineIncremental
-        |> Chart.WithXAxis(Title = "Channel A voltage")
-        |> Chart.WithYAxis(Title = "Channel B voltage")
-
-    new ChartTypes.ChartControl(chartXY, Dock = DockStyle.Fill)
-    |> form.Controls.Add
-
-    // return to the thread pool context
-    do! Async.SwitchToThreadPool () }
 
 let printStatusUpdates acquisition =
     Streaming.Acquisition.status acquisition
