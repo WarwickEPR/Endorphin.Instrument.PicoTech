@@ -78,9 +78,9 @@ module Timebase =
     let timebase (sampleInterval : Interval) =
         let ns = sampleInterval.AsLongNanoseconds
 
-        if ns < 2L      then 0u   // 1 ns
-        else if ns < 4L then 1u   // 2 ns
-        else if ns < 8L then 2u   // 4 ns
+        if ns < 2L<ns>      then 0u   // 1 ns
+        else if ns < 4L<ns> then 1u   // 2 ns
+        else if ns < 8L<ns> then 2u   // 4 ns
         else (uint32 ns) * 125u / 1000u + 1u
 
 [<RequireQualifiedAccess>]
