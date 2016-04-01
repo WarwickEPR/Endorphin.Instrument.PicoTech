@@ -9,6 +9,7 @@ open Parsing
 open StatusCodes
 open NativeModel
 open Endorphin.Core
+open Endorphin.Utilities.TimeInterval
 
 [<RequireQualifiedAccess>]
 /// Functions for performing commands and sending requests to a PicoScope 5000 series device.
@@ -279,7 +280,7 @@ module PicoScope =
                     let status = NativeApi.GetTimebase (handle device, timebase, 0, &interval, &maxSamples, index)
                     match status with
                     | StatusCode.TooManySamples -> Choice.succeed None
-                    | _                         -> status |> checkStatusAndReturn (Some (Interval_ns (nanosec <| interval), maxSamples))) 
+                    | _                         -> status |> checkStatusAndReturn (Some <| (interval |> (nanosec >> fromNanoseconds), maxSamples))) 
 
         /// Asynchronously queries the parameters for the specified timebase on a PicoScope 5000 series
         /// device with the current vertical resolution.

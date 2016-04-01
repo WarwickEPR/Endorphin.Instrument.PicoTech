@@ -6,6 +6,7 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Endorphin.Core
 open FSharp.Control.Reactive
 open System.Reactive.Concurrency
+open Endorphin.Utilities.TimeInterval
 
 /// Functions for obtaining the signal projections for an acquisition.
 module Signal =
@@ -14,13 +15,13 @@ module Signal =
         acquisition |> (Acquisition.status >> Observable.last >> Observable.takeUntilOther)
 
     /// Computes the timestamp of a sample for the given index and sample interval.
-    let private time interval (downsampling : DownsamplingRatio option) index =
+    let private time (interval : Interval) (downsampling : DownsamplingRatio option) index =
         let ratio =
             match downsampling with
             | None -> 1.0
             | Some ratio -> float ratio
 //        printfn "Time: %s" (Interval.asString interval)
-        (Interval.asSeconds interval) * (float index) * ratio
+        interval.AsFloatSeconds * (float index) * ratio
 
     /// Returns a function which converts an ADC count to a voltage for the given input sampling in an
     /// acquisition.

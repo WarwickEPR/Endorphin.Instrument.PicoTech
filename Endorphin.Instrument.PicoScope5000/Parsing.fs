@@ -3,6 +3,7 @@
 namespace Endorphin.Instrument.PicoScope5000
 
 open Endorphin.Core
+open Endorphin.Utilities.TimeInterval
 open NativeModel
 open StatusCodes
 
