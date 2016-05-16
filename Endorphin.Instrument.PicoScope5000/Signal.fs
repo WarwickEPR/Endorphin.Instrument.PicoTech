@@ -327,7 +327,7 @@ module Signal =
     /// in an acquisition.
     let private adcCountsByBlockEvent inputs acquisition =
         samplesObserved acquisition
-        |> Event.map (fun samples -> samples.Samples |> Map.findArray inputs)
+        |> Event.map (fun samples -> samples.Samples |> Map.findArray inputs )
 
     /// Returns an observable which emits an array of ADC count blocks for each sample block observed for
     /// the given array of inputs in an acquisition.
@@ -339,7 +339,7 @@ module Signal =
     /// given array of inputs in an acquisition.
     let voltagesByBlock inputs acquisition = 
         adcCountsByBlockEvent inputs acquisition
-        |> Event.map (Array.map (fun adcCounts -> adcCountsToVoltages inputs (acquisitionParameters acquisition) adcCounts))
+        |> Event.map (Array.mapi (fun i -> Array.map (adcCountToVoltage inputs.[i] (acquisitionParameters acquisition))))
         |> takeUntilFinished acquisition
 
     /// Helper function for constructing observables which buffer a specified number of the latest samples

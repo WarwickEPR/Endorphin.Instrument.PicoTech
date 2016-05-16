@@ -106,7 +106,6 @@ module Model =
 
         /// A channel which can be used to trigger acquisition.
         type TriggerChannel =
-            internal
             | InputChannelTrigger of inputChannel : InputChannel
             | ExternalTrigger
             | AuxiliaryTrigger
@@ -328,6 +327,7 @@ module Model =
         /// Status of an acquisition emitted through a status event while the acquisition is in progress.
         type AcquisitionStatus =
             | PreparingAcquisition
+            | AwaitingTrigger
             | Acquiring of sampleInterval : Interval
             | FinishedCapture of index : Capture
             | FinishedAcquisition of stoppedAutomatically : bool

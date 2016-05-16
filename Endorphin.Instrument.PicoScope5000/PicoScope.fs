@@ -10,6 +10,7 @@ open StatusCodes
 open NativeModel
 open Endorphin.Core
 open Endorphin.Utilities.TimeInterval
+open System.Runtime.InteropServices
 
 [<RequireQualifiedAccess>]
 /// Functions for performing commands and sending requests to a PicoScope 5000 series device.
@@ -607,7 +608,7 @@ module PicoScope =
                     |> checkStatusAndReturn (parseIntervalWithInterval (int hardwareInterval, timeUnit)))
 
 
-        let private runBlock' (acquisition : BlockAcquisition) timebase device =
+        let private runBlock' (acquisition : BlockAcquisition) timebase startSegment device =
             let mutable timeIndisposed : int = 0
             let parameters = acquisition.Parameters
             let guard = new Async.ContinuationGuard ()
@@ -633,6 +634,10 @@ module PicoScope =
                         if guard.Finish then
                             checkStatus status |> cont
 
+                    let callbackDelegate = PicoScopeBlockReady(blockReadyStatus)
+                    let callbackHandle = GCHandle.Alloc(callbackDelegate)
+                    use __ = { new IDisposable with member __.Dispose() = callbackHandle.Free(); GC.Collect() }
+
                     // Set up the callback. On failure continue via cont
                     try
                         NativeApi.RunBlock( handle device,
@@ -640,19 +645,19 @@ module PicoScope =
                                             parameters.PostTriggerSamples,
                                             timebase,
                                             &timeIndisposed,
-                                            MemorySegment.zero, // Always use the first memory segment for single acquisitions
-                                            PicoScopeBlockReady(blockReadyStatus),
+                                            startSegment,
+                                            callbackDelegate,
                                             nativeint 0) |> checkStatus |> Choice.bindOrRaise
                     with
                     | exn -> if guard.Finish then Choice.fail exn |> cont
-
+                    
                 return! Async.FromContinuations continuations }
 
-        let runBlock (PicoScope5000 picoScope) (acquisition : BlockAcquisition) timebase =
+        let runBlock (PicoScope5000 picoScope) (acquisition : BlockAcquisition) timebase startSegment =
             let description = sprintf "Start block acquisition: %+A" acquisition
             async {
                 let parameters = acquisition.Common.Parameters
-                return! picoScope |> CommandRequestAgent.performCommandAsync description (runBlock' acquisition timebase)  }
+                return! picoScope |> CommandRequestAgent.performCommandAsync description (runBlock' acquisition timebase startSegment)  }
         
         let private downsamplingMode (acq:AcquisitionCommon) =
             acq.Parameters.Inputs.InputSampling

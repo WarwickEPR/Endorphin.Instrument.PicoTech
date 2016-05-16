@@ -72,11 +72,17 @@ module Acquisition =
             { BlockAcquisition.Common = acquisition
               Parameters  = parameters }
 
-        let startAcquiring (acquisition:BlockAcquisition) = async {
+        let awaitingTrigger (acquisition:BlockAcquisition) = async {
+            acquisition.Common.StatusChanged.Trigger (Next <| AwaitingTrigger) }
+
+        let startAcquiringFromSegment startSegment (acquisition:BlockAcquisition) = async {
             let acq = acquisition.Common
             let! timebase = PicoScope.Sampling.findTimebaseForSampleInterval acq.PicoScope MemorySegment.zero acq.Parameters.SampleInterval
             acquisition.Common.StatusChanged.Trigger (Next <| Acquiring timebase.SampleInterval)
-            do! PicoScope.Acquisition.runBlock acquisition.Common.PicoScope acquisition timebase.Timebase }
+            do! PicoScope.Acquisition.runBlock acquisition.Common.PicoScope acquisition timebase.Timebase startSegment
+            do! awaitingTrigger  acquisition}
+
+        let startAcquiring = startAcquiringFromSegment 0u
 
             // async workflow calls RunBlock with a callback to here as an Async<unit> if status ok
             // Run GetValues in an async workflow, then handleValuesReady on the output
@@ -113,7 +119,7 @@ module Acquisition =
             let picoscope = acquisition.Common.PicoScope
             async {
                 let! valuesReady = PicoScope.Acquisition.getValues picoscope acquisition segment 0u numberOfSamples
-                do! valuesReady |> handleSamplesReady acquisition.Common 0}
+                do! valuesReady |> handleSamplesReady acquisition.Common 0 }
 
         let fetchBlocks (acquisition:BlockAcquisition) =
             match acquisition.Parameters.Buffering with
@@ -177,14 +183,13 @@ module Acquisition =
                 for (start,length) in Block.chunk chunkSize count do
                     let finish = start + length - 1u
                     for capture in start .. finish do
-                        let index = int capture - int start
                         do! Common.setDataBuffersByChannel capture (int capture - int start) acquisition.Common
                     let! valuesReady = PicoScope.Acquisition.getValuesBulk picoscope acquisition start finish (uint32 samples)
                     for values in valuesReady do
                         do! Block.handleSamplesReady acquisition.Common (int values.Capture - int start) values
                         notifyCaptureComplete values.Capture acquisition }
 
-        let fetchBlocks (acquisition:RapidBlockAcquisition) =
+        let fetchBlocks' (acquisition:RapidBlockAcquisition) =
             match acquisition.Acquisition.Parameters.Buffering with
             | Streaming ->
                 fetchStreamingSequence acquisition.Count acquisition.Acquisition
@@ -194,6 +199,17 @@ module Acquisition =
                 fetchMultipleBlockSequence acquisition.Count count acquisition.Acquisition
             | AllCaptures ->
                 fetchMultipleBlockSequence acquisition.Count acquisition.Count acquisition.Acquisition
+        
+        let fetchBlocks (acquisition:RapidBlockAcquisition) =  async {
+            do! fetchBlocks' acquisition
+            do! PicoScope.Acquisition.stop acquisition.Acquisition.Common.PicoScope }
+
+        let interruptAcquisition (acquisition:RapidBlockAcquisition) = async {
+            do! PicoScope.Acquisition.stop acquisition.Acquisition.Common.PicoScope
+            let! capturesCompleted = PicoScope.Acquisition.queryNumberOfCaptures acquisition.Acquisition.Common.PicoScope
+            // fetch blocks from start to end
+            do! Block.startAcquiringFromSegment capturesCompleted acquisition.Acquisition
+            }
 
 
     [<AutoOpen>]
@@ -347,6 +363,12 @@ module Acquisition =
     let waitToStart acquisition =
         status acquisition
         |> Observable.choose (function Acquiring _ -> Some () | _ -> None)
+        |> Async.AwaitObservable
+
+    /// Asynchronously waits for streaming to being.
+    let waitUntilTriggerPrimed acquisition =
+        status acquisition
+        |> Observable.choose (function AwaitingTrigger -> Some () | _ -> None)
         |> Async.AwaitObservable
 
     /// Asynchronously waits for the acquisition associated with the given handle to finish and returns

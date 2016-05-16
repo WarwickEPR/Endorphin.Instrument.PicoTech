@@ -36,29 +36,34 @@ module Common =
         |> Observable.sample (TimeSpan.FromMilliseconds 50.0)
         |> Observable.add (printfn "Sample: %A")
 
+    let printSampledBlocks inputs acquisition =
+        Signal.voltagesByBlock inputs acquisition
+        |> Observable.sample (TimeSpan.FromMilliseconds 50.0)
+        |> Observable.add (printfn "Sample: %A")
+
     let printSampledDigital input acquisition =
         Signal.digitalByteByTime input acquisition
         |> Observable.sample (TimeSpan.FromMilliseconds 50.0)
         |> Observable.add (printfn "Digital Sample: %A")
 
-    let printDigitalTags bit input acquisition =
-        Signal.digitalBitByTime bit input acquisition
-        |> Signal.digitalEdge Signal.RisingEdge
-        |> Observable.add (printfn "Edge: %A")
-
-    let printPulseRate bit inputs acquisition =
-        Signal.digitalBitByTime bit inputs acquisition
-        |> Signal.digitalEdge Signal.RisingEdge
-        |> Observable.bufferSpan (TimeSpan.FromSeconds 0.5)
-        |> Observable.add (fun x -> (printfn "Pulse rate: %d /s" (x.Count * 2)))
-
-    let printPulseTotalCount bit input acquisition =
-        let timer = System.Diagnostics.Stopwatch()
-        timer.Start()
-        Signal.digitalBitByTime bit input acquisition
-        |> Signal.digitalEdge Signal.RisingEdge
-        |> Observable.count
-        |> Observable.add (fun x -> let t = timer.ElapsedMilliseconds;
+//    let printDigitalTags bit input acquisition =
+//        Signal.digitalBitByTime bit input acquisition
+//        |> Signal.digitalEdge Signal.RisingEdge
+//        |> Observable.add (printfn "Edge: %A")
+//
+//    let printPulseRate bit inputs acquisition =
+//        Signal.digitalBitByTime bit inputs acquisition
+//        |> Signal.digitalEdge Signal.RisingEdge
+//        |> Observable.bufferSpan (TimeSpan.FromSeconds 0.5)
+//        |> Observable.add (fun x -> (printfn "Pulse rate: %d /s" (x.Count * 2)))
+//
+//    let printPulseTotalCount bit input acquisition =
+//        let timer = System.Diagnostics.Stopwatch()
+//        timer.Start()
+//        Signal.digitalBitByTime bit input acquisition
+//        |> Signal.digitalEdge Signal.RisingEdge
+//        |> Observable.count
+//        |> Observable.add (fun x -> let t = timer.ElapsedMilliseconds;
                                     printfn "Received %d pulses in %.1f s. Approx rate: %d ks/s" x (float t*0.001) (x/int t))
     let printRate inputs acquisition =
         Signal.adcCountByTime inputs acquisition

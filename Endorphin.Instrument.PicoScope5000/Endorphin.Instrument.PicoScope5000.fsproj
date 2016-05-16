@@ -79,6 +79,7 @@
     <None Include="SimpleRapidBlock.fsx" />
     <None Include="SimpleRapidBlockChart.fsx" />
     <None Include="DownsampledRapidBlock.fsx" />
+    <None Include="RapidBlockPartial.fsx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Endorphin.Utilities.TimeInterval\Endorphin.Utilities.TimeInterval.fsproj">

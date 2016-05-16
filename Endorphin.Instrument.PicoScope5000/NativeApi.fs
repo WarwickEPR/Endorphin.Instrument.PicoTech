@@ -185,6 +185,7 @@ module internal NativeApi =
     /// This function starts collecting data in block mode. See the programming guide for details.
     extern StatusCode RunBlock(int16 handle, int numberOfPreTriggerSamples, int numberOfPostTriggerSamples, uint32 timebase, int& timeIndisposedInMillisec,
         uint32 segmentIndex, PicoScopeBlockReady callback, nativeint state);
+
  
     [<DllImport(dllName, EntryPoint = "ps5000aRunStreaming")>]
     /// This function tells the oscilloscope to start collecting data in streaming mode. When data has been collected from the device it is
