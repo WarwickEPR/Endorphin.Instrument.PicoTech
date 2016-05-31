@@ -609,34 +609,32 @@ module PicoScope =
 
 
         let private runBlock' (acquisition : BlockAcquisition) timebase startSegment device =
-            let mutable timeIndisposed : int = 0
-            let parameters = acquisition.Parameters
-            let guard = new Async.ContinuationGuard ()
+
+            // Defer continuation from the callback
+            let monitor = new Async.DeferredContinuation<unit>()
+
+            // Construct the callback and pin using its delegate
+            let blockReadyStatus _ status _ =
+                match checkStatus status with
+                | Success _ -> monitor.Continue()
+                | Failure exn -> monitor.Error exn
+            let callbackDelegate = PicoScopeBlockReady(blockReadyStatus)
+            monitor.CallbackHandle <- GCHandle.Alloc(callbackDelegate)
 
             async {
+                // Guard the setup procedure continuations
+                let guard = new Async.ContinuationGuard ()
                 let! ct = Async.CancellationToken // get the token for this context
 
-                // On success, continue with a Choice.Success via cont
-                // On failure, return with a Choice.Failure via cont
-                // On cancellation in this scope, continue via ccont
-                // The exception continuation is not used
-                // Exactly one continuation function must be called
-                let continuations (cont,econt,ccont) =
+                let setupCallback (cont,econt,ccont) =
+                    let mutable timeIndisposed : int = 0
+                    let parameters = acquisition.Parameters
 
                     // On cancellation in this scope, just pass control to the cancellation continuation
                     let cancellationCompensation() =
                         if guard.Cancel then
                             OperationCanceledException() |> ccont
-                    use reg = ct.Register <| Action cancellationCompensation
-
-                    // Handling the callback. On success or error continue via cont
-                    let blockReadyStatus _ status _ =
-                        if guard.Finish then
-                            checkStatus status |> cont
-
-                    let callbackDelegate = PicoScopeBlockReady(blockReadyStatus)
-                    let callbackHandle = GCHandle.Alloc(callbackDelegate)
-                    use __ = { new IDisposable with member __.Dispose() = callbackHandle.Free(); GC.Collect() }
+                    use __ = ct.Register <| Action cancellationCompensation
 
                     // Set up the callback. On failure continue via cont
                     try
@@ -648,16 +646,27 @@ module PicoScope =
                                             startSegment,
                                             callbackDelegate,
                                             nativeint 0) |> checkStatus |> Choice.bindOrRaise
-                    with
-                    | exn -> if guard.Finish then Choice.fail exn |> cont
-                    
-                return! Async.FromContinuations continuations }
+                    with exn ->
+                        if guard.Finish then Choice.fail exn |> cont
+                
+                    if guard.Finish then Choice.succeed() |> cont
+
+                let wait (cont,econt,ccont) =
+                    monitor.RegisterContinuations((cont,econt,ccont))
+                    ()
+
+                let setup = Async.FromContinuations setupCallback
+                let waitHandle = Async.FromContinuations wait
+
+                let! result = setup
+                return result |> Choice.map (fun _ -> waitHandle) }
 
         let runBlock (PicoScope5000 picoScope) (acquisition : BlockAcquisition) timebase startSegment =
             let description = sprintf "Start block acquisition: %+A" acquisition
             async {
                 let parameters = acquisition.Common.Parameters
-                return! picoScope |> CommandRequestAgent.performCommandAsync description (runBlock' acquisition timebase startSegment)  }
+                let a = runBlock' acquisition timebase startSegment
+                return! picoScope |> CommandRequestAgent.performObjectRequestAsync description a  }
         
         let private downsamplingMode (acq:AcquisitionCommon) =
             acq.Parameters.Inputs.InputSampling

@@ -79,8 +79,9 @@ module Acquisition =
             let acq = acquisition.Common
             let! timebase = PicoScope.Sampling.findTimebaseForSampleInterval acq.PicoScope MemorySegment.zero acq.Parameters.SampleInterval
             acquisition.Common.StatusChanged.Trigger (Next <| Acquiring timebase.SampleInterval)
-            do! PicoScope.Acquisition.runBlock acquisition.Common.PicoScope acquisition timebase.Timebase startSegment
-            do! awaitingTrigger  acquisition}
+            let! (handle:Async<unit>) =  PicoScope.Acquisition.runBlock acquisition.Common.PicoScope acquisition timebase.Timebase startSegment
+            do! awaitingTrigger acquisition
+            return handle }
 
         let startAcquiring = startAcquiringFromSegment 0u
 
@@ -208,7 +209,7 @@ module Acquisition =
             do! PicoScope.Acquisition.stop acquisition.Acquisition.Common.PicoScope
             let! capturesCompleted = PicoScope.Acquisition.queryNumberOfCaptures acquisition.Acquisition.Common.PicoScope
             // fetch blocks from start to end
-            do! Block.startAcquiringFromSegment capturesCompleted acquisition.Acquisition
+            return! Block.startAcquiringFromSegment capturesCompleted acquisition.Acquisition
             }
 
 
@@ -230,8 +231,10 @@ module Acquisition =
 
         /// Given a prepared Acquisition, allocate buffers, set up device and prime for triggered acquisition
         let startAcquiring = function
-            | StreamingAcquisition acquisition ->
-                Streaming.startAcquiring acquisition
+            | StreamingAcquisition acquisition -> async {
+                    do! Streaming.startAcquiring acquisition
+                    return async {()}
+                }
             | BlockAcquisition acquisition ->
                 Block.startAcquiring acquisition
             | RapidBlockAcquisition acquisition ->
@@ -261,7 +264,7 @@ module Acquisition =
     /// compensations should be registered with this cancellation token which will post commands to the
     /// PicoScope. Returns a handle which can be used to stop the acquisition manually or wait for it to
     /// finish asynchronously.
-    let startWithCancellationToken (acquisition:Acquisition) cancellationToken =
+    let startWithCancellationToken (acquisition:Acquisition) triggerWorkflow cancellationToken =
         if (common acquisition).StopCapability.IsCancellationRequested then
             failwith "Cannot start an acquisition which has already been stopped."
             
@@ -311,14 +314,21 @@ module Acquisition =
 
 
         // define the acquisition workflow
-        let acquisitionWorkflow = async {
+        let setupWorkflow = async {
             let acq = common acquisition
             use __ = Inputs.Buffers.createPinningHandle acq.DataBuffers
             do! prepareDevice acquisition
-            do! startAcquiring acquisition
-            do! handleData acquisition }
+            return! startAcquiring acquisition }
 
+        let processingWorkflow dataWaiting = async {
+            do! dataWaiting
+            do! handleData acquisition }
             
+        let acquisitionWorkflow = async {
+            let! dataWaiting = setupWorkflow
+            do! triggerWorkflow
+            do! processingWorkflow dataWaiting }
+
         // start it with the continuations defined above and the given cancellation token
         Async.StartWithContinuations(
                 acquisitionWorkflow,
@@ -348,7 +358,10 @@ module Acquisition =
     /// token is required, then start the acquisition using startWithCancellationToken instead. Returns
     /// a handle which can be used to stop the acquisition manually or wait for it to finish
     /// asynchronously.
-    let start acquisition = startWithCancellationToken acquisition Async.DefaultCancellationToken
+    let doNothing = async {()}
+    let start acquisition = startWithCancellationToken acquisition doNothing Async.DefaultCancellationToken
+    let startWithTrigger acquisition trigger = startWithCancellationToken acquisition trigger Async.DefaultCancellationToken
+
 
     /// Starts a streaming acquisition as a child (sharing the same cancellation token) to the current
     /// asynchronous workflow. To ensure that the acquisition is stopped cleanly, no other cancellation 
@@ -357,18 +370,17 @@ module Acquisition =
     /// finish asynchronously.
     let startAsChild acquisition = async {
         let! ct = Async.CancellationToken
-        return startWithCancellationToken acquisition ct }
+        return startWithCancellationToken acquisition doNothing ct }
+
+    let startWithTriggerAsChild acquisition trigger = async {
+        let! ct = Async.CancellationToken
+        return startWithCancellationToken acquisition trigger ct }
+
 
     /// Asynchronously waits for streaming to being.
     let waitToStart acquisition =
         status acquisition
         |> Observable.choose (function Acquiring _ -> Some () | _ -> None)
-        |> Async.AwaitObservable
-
-    /// Asynchronously waits for streaming to being.
-    let waitUntilTriggerPrimed acquisition =
-        status acquisition
-        |> Observable.choose (function AwaitingTrigger -> Some () | _ -> None)
         |> Async.AwaitObservable
 
     /// Asynchronously waits for the acquisition associated with the given handle to finish and returns
