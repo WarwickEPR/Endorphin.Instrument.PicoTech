@@ -1,20 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>b1b7a7f3-66b2-48e4-9f37-b1d2d9903904</ProjectGuid>
+    <ProjectGuid>603fcd0a-8ad4-42b7-8954-63196031c311</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Endorphin.Instrument.PicoScope5000</RootNamespace>
-    <AssemblyName>Endorphin.Instrument.PicoScope5000</AssemblyName>
+    <RootNamespace>Endorphin.Instrument.PicoScope3000</RootNamespace>
+    <AssemblyName>Endorphin.Instrument.PicoScope3000</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <Name>Endorphin.Instrument.PicoScope5000</Name>
-    <ReferencePath>
-    </ReferencePath>
-    <TargetFrameworkProfile />
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Name>Endorphin.Instrument.PicoScope3000</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,7 +22,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Endorphin.Instrument.PicoScope5000.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\Endorphin.Instrument.PicoScope3000.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,7 +31,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Endorphin.Instrument.PicoScope5000.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Endorphin.Instrument.PicoScope3000.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -55,13 +53,13 @@
     <Compile Include="StatusCodes.fs" />
     <Compile Include="NativeModel.fs" />
     <Compile Include="NativeApi.fs" />
+    <Compile Include="Exception.fs" />
     <Compile Include="Model.fs" />
     <Compile Include="Parsing.fs" />
-    <Compile Include="ChannelSettings.fs" />
     <Compile Include="Quantities.fs" />
     <Compile Include="Device.fs" />
+    <Compile Include="ChannelSettings.fs" />
     <Compile Include="TriggerSettings.fs" />
-    <Compile Include="SignalGenerator.fs" />
     <Compile Include="Inputs.fs" />
     <Compile Include="Async.fs" />
     <Compile Include="PicoScope.fs" />
@@ -71,9 +69,9 @@
     <Compile Include="Acquisition.fs" />
     <Compile Include="Signal.fs" />
     <None Include="StreamingDemo.fsx" />
-    <None Include="NVSpectrometer.fsx" />
-    <Content Include="app.config" />
     <Content Include="packages.config" />
+    <None Include="TriggerExercise.fsx" />
+    <None Include="exception-test.fsx" />
     <None Include="Common.fsx" />
     <None Include="SimpleBlock.fsx" />
     <None Include="SimpleBlockChart.fsx" />
@@ -88,19 +86,20 @@
       <HintPath>..\packages\FSharp.Control.Reactive.3.2.0\lib\net40\FSharp.Control.Reactive.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharp.Core">
-      <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="FSharp.Core, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="log4net">
-      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\Endorphin.Core\Endorphin.Core.fsproj">
+      <Name>Endorphin.Core</Name>
+      <Project>{b1887520-0f25-4ff4-958e-12b964df20f9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="System.Reactive.Core">
       <HintPath>..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
       <Private>True</Private>
@@ -117,13 +116,6 @@
       <HintPath>..\packages\Rx-PlatformServices.2.2.5\lib\net45\System.Reactive.PlatformServices.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Forms.DataVisualization" />
-    <ProjectReference Include="..\Endorphin.Core\Endorphin.Core.fsproj">
-      <Name>Endorphin.Core</Name>
-      <Project>{b1887520-0f25-4ff4-958e-12b964df20f9}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

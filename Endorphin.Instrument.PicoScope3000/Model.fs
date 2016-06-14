@@ -1,22 +1,18 @@
 // Copyright (c) University of Warwick. All Rights Reserved. Licensed under the Apache License, Version 2.0. See LICENSE.txt in the project root for license information.
 
-namespace Endorphin.Instrument.PicoScope5000
+namespace Endorphin.Instrument.PicoScope3000
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
-
-open Endorphin.Core.CommandRequestAgent
 open Endorphin.Core
 
 [<AutoOpen>]
-/// PicoScope 5000 series high level model types.
 module Model =
-    
-    /// Contains the serial number and API device handle for a PicoScope 5000 series.
-    type internal PicoScope5000Identity = { SerialNumber : string ; Handle : int16 }
+    /// Contains the serial number and API device handle for a PicoScope 3000 series.
+    type internal PicoScope3000Identity = { SerialNumber : string ; Handle : int16}
 
-    /// Contains details of a PicoScope 5000 series connection and allows the user to
+    /// Contains details of a PicoScope 3000 series connection and allows the user to
     /// perform commands and send requests to the device.
-    type PicoScope5000 = internal PicoScope5000 of agent : CommandRequestAgent<PicoScope5000Identity>
+    type PicoScope3000 = internal PicoScope3000 of agent : CommandRequestAgent<PicoScope3000Identity>
 
     /// Toggle state indicating whether an option is enabled or disabled.
     type ToggleState = Enabled | Disabled
@@ -65,27 +61,45 @@ module Model =
 
     /// Voltage with unit of measure.
     type Voltage = float32<V>
-    
+
     /// Type alias for a 16-bit integer which is the format of all samples returned by the
     /// hardware.
     type AdcCount = int16
-    
+
     /// Number of samples.
     type SampleCount = int
 
     /// Sample index in a buffer.
     type SampleIndex = uint32
-    
+
+
+
+
+
+
     [<AutoOpen>]
     /// Model types related to channel settings.
     module ChannelSettings =
 
-        /// Input channel.
-        type InputChannel =
+        type AnalogueChannel =
             | ChannelA
             | ChannelB
             | ChannelC
             | ChannelD
+
+        // Port 0 corresponds to pins 0 to 7, and port 1 corresponds to pins 8 to 15.
+        type DigitalPort =
+            | Port0
+            | Port1
+
+        type DigitalChannel =
+            |D0 |D1 |D2 |D3 |D4 |D5 |D6 |D7
+            |D8 |D9 |D10|D11|D12|D13|D14|D15
+
+        /// Input channel.
+        type InputChannel =
+            | Analogue of channel : AnalogueChannel
+            | Digital  of port    : DigitalPort
 
         /// Input channel peak-to-peak voltage range.
         type Range =
@@ -109,11 +123,19 @@ module Model =
         type Bandwidth = FullBandwidth | Bandwidth_20MHz
 
         /// All input settings for an enabled input channel.
-        type InputSettings = 
+        type AnalogueSettings =
             internal { Coupling       : Coupling
                        Range          : Range
                        AnalogueOffset : Voltage
                        BandwidthLimit : Bandwidth }
+
+        type DigitalSettings =
+            internal { LogicLevel : Voltage }
+
+        type InputSettings =
+            internal
+            | AnalogueSettings of settings : AnalogueSettings
+            | DigitalSettings  of settings : DigitalSettings
 
         /// Indicates whether a channel is enabled and contains its input settings if so.
         type ChannelSettings =
@@ -121,87 +143,155 @@ module Model =
             | EnabledChannel of inputSettings : InputSettings
             | DisabledChannel
 
+
+
+
+
+
     [<AutoOpen>]
     /// Model types related to the hardware state.
     module Device =
-        
-        /// Power source used for a PicoScope 5000 series device.
+        /// Power source used for a PicoScope 3000 series device.
         type PowerSource = MainsPower | UsbPower
 
-        /// Front panel LED flash state for a PicoScope 5000 series device.
+        /// Front panel LED flash state for a PicoScope 3000 series device.
         type LedFlash =
             internal
             | LedOff
             | LedRepeat of counts : int16
             | LedIndefiniteRepeat
 
+
+
+
+
+
+
+
     [<AutoOpen>]
-    /// Model types related to trigger settings.
     module Triggering =
 
-        /// A channel which can be used to trigger acquisition.
-        type TriggerChannel =
-            internal
-            | InputChannelTrigger of inputChannel : InputChannel
+        type Channel =
+            | AnalogueTrigger of channel : AnalogueChannel
             | ExternalTrigger
             | AuxiliaryTrigger
 
-        /// Trigger level threshold crossing direction required to trigger acquisition.
-        type LevelThreshold =
-            | Above
-            | Below
-            | Rising
-            | Falling
-            | RisingOrFalling
+        module Simple =
 
-        /// Window threshold state required to trigger acquisition.
-        type WindowThreshold =
-            | Inside
-            | Outside
-            | Enter
-            | Exit
-            | EnterOrExit
+            type Direction =
+                | Above
+                | Below
+                | Rising
+                | Falling
+                | RisingOrFalling
+
+            type Trigger =
+                internal { Source     : Channel
+                           Threshold  : AdcCount
+                           Direction  : Direction }
+
+        module Complex =
+
+            type Source =
+                | Channel of channel : Channel
+                | DigitalTrigger
+                | PulseWidthQualifierTrigger
+
+            type internal AdcThreshold =
+                { AdcThreshold  : AdcCount
+                  Hysteresis    : AdcCount option }
+            let internal noHysteresis:AdcCount = 0s
+
+            type Threshold =
+                { Threshold  : Voltage
+                  Hysteresis : Voltage option }
+
+            type Condition =
+                internal
+                | Above           of level : Threshold   // for gated triggers: above the upper threshold
+                | Below           of level : Threshold   // for gated triggers: below the upper threshold
+                | Rising          of level : Threshold   // for threshold triggers: rising edge, using upper threshold
+                | Falling         of level : Threshold   // for threshold triggers: falling edge, using upper threshold
+                | RisingOrFalling of level : Threshold   // for threshold triggers: either edge
+                | Inside          of lower : Threshold * upper : Threshold  // for window-qualified triggers: inside window
+                | Outside         of lower : Threshold * upper : Threshold  // for window-qualified triggers: outside window
+                | Enter           of lower : Threshold * upper : Threshold  // for window triggers: entering the window
+                | Exit            of lower : Threshold * upper : Threshold  // for window triggers: leaving the window
+                | EnterOrExit     of lower : Threshold * upper : Threshold  // for window triggers: either entering or leaving the window
+                | PositiveRunt    of lower : Threshold * upper : Threshold  // for window-qualified triggers
+                | NegativeRunt    of lower : Threshold * upper : Threshold  // for window-qualified triggers
+
+            let (|LevelCondition|WindowCondition|) = function
+                | Above level
+                | Below level
+                | Rising level
+                | Falling level
+                | RisingOrFalling level -> LevelCondition level
+                | Inside (lower, upper)
+                | Outside (lower, upper)
+                | Enter (lower, upper)
+                | Exit (lower, upper)
+                | EnterOrExit (lower, upper)
+                | PositiveRunt (lower, upper)
+                | NegativeRunt (lower, upper) -> WindowCondition (lower, upper)
+
+            type DigitalCondition =
+                internal
+                | High
+                | Low
+                | RisingEdge
+                | FallingEdge
+                | RisingOrFallingEdge
+
+            // Complex triggers can be a boolean combination of the states of the triggering
+            // conditions on all the channels.
+            type State =
+                | Require of Source * bool
+                | And of State * State
+                | Or of State * State
+
+                static member (*) (a,b) =
+                    And <| (a,b)
+
+                static member (/) (a,b) =
+                    Or <| (a,b)
+
+            type Trigger =
+                { TriggerState       : State                 // Boolean combinations of trigger conditions required
+                  AnalogueConditions : Map<Source,Condition> // At most one trigger condition per channel
+                  DigitalConditions  : Map<DigitalChannel,DigitalCondition> } // ANDed together to make a digital trigger
+
+        module Advanced =
+            () // with PulseWidthQualifiers
+            // PulseWidthQualifiers can be used with or without triggering configuration
+            // but are not fully independent. For instance if the upper threshold used triggering on a channel
+            // the lower threshold must be used for PWQ. However the direction used to "trigger" PWQ can only
+            // be set across all PWQ, whereas the direction and thresholds can be set per channel.
 
         /// Auto-trigger delay.
         type AutoTriggerDelay = internal AutoTriggerDelay_ms of delay : int16<ms>
+        let noAutoTrigger = (AutoTriggerDelay_ms 0s<ms>)
 
-        /// Defines simple trigger settings, which are able to trigger acquisition on a voltage
-        /// threshold crossing on a specified trigger channel, or optionally also trigger
-        /// automatically after a specified delay.
-        type SimpleTriggerSettings =
-            internal { TriggerChannel     : TriggerChannel
-                       AdcThreshold       : AdcCount
-                       ThresholdDirection : LevelThreshold
-                       StartSample        : SampleIndex
-                       AutoTrigger        : AutoTriggerDelay option }
+        let noDelay : SampleCount = 0
 
-        /// Captures possible trigger settings for a PicoScope 5000 series device. Note that
-        /// compound (advanced) trigger settings are not currently implemented.
-        type TriggerSettings =
-            internal
-            | SimpleTrigger of settings : SimpleTriggerSettings
-            | AutoTrigger of delay : AutoTriggerDelay
-    
-        /// Indicates whether triggering or pulse width qualifier mode are enabled.
-        type TriggerStatus =
-            internal { TriggerState             : ToggleState
-                       PulseWidthQualifierState : ToggleState }
+        type Trigger =
+        | AutoTrigger
+        | SimpleTrigger of trigger : Simple.Trigger
+        | ComplexTrigger of trigger : Complex.Trigger
+
+        type TriggerSetting = { Trigger : Trigger
+                                Delay   : SampleCount option
+                                Auto    : AutoTriggerDelay option }
+
+
+
+
+
+
 
     [<AutoOpen>]
     /// Model types related to signal sampling and acquisition.
     module Acquisition =
-        
-        /// Vertical resolution, set for all input channels on the device. The PicoScope 5000
-        /// series uses a variable resolution architecture which allows it to change the
-        /// resolution between 8 and 16 bit in exchange for having fewer channels and/or a
-        /// lower maximum sampling rate. 
-        type Resolution =
-            | Resolution_8bit
-            | Resolution_12bit
-            | Resolution_14bit
-            | Resolution_15bit
-            | Resolution_16bit
-
         /// Downsampling ratio used to reduce the data sampled by the oscilloscope before
         /// sending it to the computer.
         type DownsamplingRatio = uint32
@@ -213,7 +303,7 @@ module Model =
         /// Index of capture in rapid block acquisition
         type Capture = uint32
 
-        /// Timebase index, indicating the sample interval for acquisition. The relatinship
+        /// Timebase index, indicating the sample interval for acquisition. The relationship
         /// between timebase index and sample interval depends on the current device
         /// resolution.
         type Timebase = uint32
@@ -223,10 +313,9 @@ module Model =
         /// resolution.
         type TimebaseParameters =
             internal { Timebase       : Timebase
-                       Resolution     : Resolution
-                       MaximumSamples : SampleCount 
-                       SampleInterval : Interval } 
-        
+                       MaximumSamples : SampleCount
+                       SampleInterval : Interval }
+
         /// Downsampling mode used to reduce data captured by the oscilloscope before sending
         /// it to the computer.
         type DownsamplingMode =
@@ -237,25 +326,26 @@ module Model =
 
         /// Equivalent time sampling mode setting. In ETS mode, the PicoScope samples a repetitive
         /// signal by interleaving multiple captures to achieve smaller sample intervals.
-        type EtsMode = 
+        type EtsMode =
             | NoEts
             | FastEts
             | SlowEts
-        
+
         /// Specifies the sampling settings used to capture a particular input channel and transfer
         /// it to the computer.
         type InputSampling =
             internal { InputChannel     : InputChannel
                        DownsamplingMode : DownsamplingMode }
 
+
         /// Contains sampling settings for all input channels used in an acquisition.
-        type AcquisitionInputs = 
+        type AcquisitionInputs =
             internal { InputSettings : Map<InputChannel, InputSettings>
                        InputSampling : Set<InputSampling> }
-        
+
         /// The downsampling mode which was used to reduce the samples stored in a data buffer
         /// before sending them to the computer.
-        type BufferDownsampling =  
+        type BufferDownsampling =
             | NoDownsamplingBuffer
             | AveragedBuffer
             | DecimatedBuffer
@@ -277,8 +367,7 @@ module Model =
         type AcquisitionParameters =
             { Inputs            : AcquisitionInputs
               SampleInterval    : Interval  // requested, check timebase actually applied
-              Resolution        : Resolution
-              Trigger           : TriggerSettings
+              Trigger           : TriggerSetting
               DownsamplingRatio : DownsamplingRatio option
               BufferLength      : SampleCount}
 
@@ -352,7 +441,7 @@ module Model =
             internal { Samples          : Map<InputChannel * BufferDownsampling, AdcCount array>
                        Capture          : MemorySegment
                        Length           : SampleCount
-                       VoltageOverflows : Set<InputChannel> }
+                       VoltageOverflows : Set<AnalogueChannel> }
 
         /// Contains information about the way an acquisition was stopped, indicating whether
         /// it was stopped manually or automatically.
@@ -370,7 +459,7 @@ module Model =
 
         type AcquisitionCommon =
             internal { Parameters      : AcquisitionParameters
-                       PicoScope       : PicoScope5000
+                       PicoScope       : PicoScope3000
                        DataBuffers     : AcquisitionBuffers
                        SamplesObserved : Event<AcquiredSamples>
                        StopCapability  : CancellationCapability<StopStatus>
@@ -380,7 +469,7 @@ module Model =
             { Capture          : Capture
               StartIndex       : SampleIndex
               NumberOfSamples  : SampleCount
-              VoltageOverflows : Set<InputChannel> }
+              VoltageOverflows : Set<AnalogueChannel> }
         
         type Expecting = MoreData | NoMoreData
 
@@ -437,66 +526,3 @@ module Model =
         // Finding the correct timebase - fastest few are special cases which may have restrictions.
         // The rest of the uint is linear multiple of some small base unit, which differs between models
         // Use one of the GetTimebase calls to check the timebase selected is closest to the one requested
-        
-    /// Model types related to the integrated signal generator
-    module SignalGenerator =
-            
-        /// Signal generator sweep direction.
-        type SweepDirection = Up | Down | UpDown | DownUp
-
-        /// Signal generator frequency sweep parameters.
-        type FrequencySweepParameters =
-            internal { StartFrequency     : float32<Hz>
-                       StopFrequency      : float32<Hz>
-                       FrequencyIncrement : float32<Hz>
-                       DwellTime          : float32<s>
-                       SweepDirection     : SweepDirection }
-            
-        /// Signal generator output frequency (either fixed or swept).
-        type Frequency =
-            internal 
-            | FixedFrequency of frequency : float32<Hz>
-            | FrequencySweep of parameters : FrequencySweepParameters
-
-        /// Built-in signal generator waveform options.
-        type BuiltInWaveform = 
-            internal
-            | Sine                  of peakToPeak : Voltage * offset : Voltage * frequency : Frequency
-            | Square                of peakToPeak : Voltage * offset : Voltage * frequency : Frequency
-            | Triangle              of peakToPeak : Voltage * offset : Voltage * frequency : Frequency
-            | DCVoltage             of                        offset : Voltage
-            | RampUp                of peakToPeak : Voltage * offset : Voltage * frequency : Frequency
-            | RampDown              of peakToPeak : Voltage * offset : Voltage * frequency : Frequency
-            | Sinc                  of peakToPeak : Voltage * offset : Voltage * frequency : Frequency
-            | Gaussian              of peakToPeak : Voltage * offset : Voltage * frequency : Frequency
-            | HalfSine              of peakToPeak : Voltage * offset : Voltage * frequency : Frequency
-            | WhiteNoise            of peakToPeak : Voltage * offset : Voltage
-            | PseudoRandomBitStream of peakToPeak : Voltage * offset : Voltage * bitRate : float32<Hz>
-
-        /// Signal generator playback mode.
-        type PlaybackMode =
-            internal
-            | ContinuousPlayback
-            | NumberOfCycles of cycles : uint32
-            | NumberOfSweeps of sweeps : uint32
-
-        /// Signal generator trigger.
-        type SignalGeneratorTriggerType = internal Rising | Falling | GateHigh | GateLow
-
-        /// Signal generator trigger source.
-        type SignalGeneratorTriggerSource = 
-            internal 
-            | ScopeTrigger
-            | ExternalTrigger of threshold : Voltage
-            | SoftwareTrigger
-
-        /// Signal generator trigger settings.
-        type SignalGeneratorTriggerSettings =
-            | AutoTrigger
-            | SignalGeneratorTrigger of triggerSource : SignalGeneratorTriggerSource * triggerType : SignalGeneratorTriggerType
-
-        /// Signal generator built-in waveform parameters.
-        type BuiltInWaveformSettings =
-            internal { Waveform        : BuiltInWaveform
-                       PlaybackMode    : PlaybackMode
-                       TriggerSettings : SignalGeneratorTriggerSettings }

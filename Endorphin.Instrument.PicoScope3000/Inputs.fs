@@ -1,6 +1,6 @@
 // Copyright (c) University of Warwick. All Rights Reserved. Licensed under the Apache License, Version 2.0. See LICENSE.txt in the project root for license information.
 
-namespace Endorphin.Instrument.PicoScope5000
+namespace Endorphin.Instrument.PicoScope3000
 
 open Endorphin.Core
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
@@ -9,14 +9,14 @@ open System.Runtime.InteropServices
 open Parsing
 
 [<RequireQualifiedAccess>]
-/// Functions for specifying acquisition inputs and sampling for a PicoScope 5000 series acquisition.
+/// Functions for specifying acquisition inputs and sampling for a PicoScope 3000 series acquisition.
 module internal Inputs =
 
     /// Returns the set of enabled channels in the given acquisition inputs.
     let enabledChannels inputs = Map.keys inputs.InputSettings
     
     /// Indicates whether the given acquisition inputs use downsampling.
-    let hasDownsampling inputs = 
+    let hasDownsampling inputs =
         inputs.InputSampling
         |> Set.exists (fun sampling -> sampling.DownsamplingMode <> NoDownsampling) 
 
@@ -31,19 +31,24 @@ module internal Inputs =
     let inputSampling inputs = 
         inputs.InputSampling |> Set.toSeq
 
+    let analogueSettings coupling range voltageOffset bandwidth =
+        AnalogueSettings <| { Coupling = coupling
+                              Range = range
+                              AnalogueOffset = voltageOffset
+                              BandwidthLimit = bandwidth }
+
     /// Returns a modified set of acquisition inputs which has the specified set of input channels enabled
     /// with the given input settings. Fails if a channel in the set is already enabled.
-    let private enableChannelSet inputChannels coupling range voltageOffset bandwidth inputs =
+    let private enableChannelSet inputChannels settings inputs =
         let repeatedInputs = Set.intersect inputChannels (enabledChannels inputs)
         if not (repeatedInputs |> Set.isEmpty) then
-            failwithf "Cannot enable the following inputs which are already enabled: %A" repeatedInputs
+            invalidArg "Input channels" <| sprintf "Cannot enable the following inputs which are already enabled: %A" repeatedInputs
 
         { inputs with
             InputSettings =
                 inputChannels
                 |> Set.toSeq
-                |> Seq.map (fun inputChannel ->
-                    (inputChannel, { Coupling = coupling ; Range = range ; AnalogueOffset = voltageOffset ; BandwidthLimit = bandwidth }))
+                |> Seq.map (fun inputChannel -> (inputChannel, settings))
                 |> Map.ofSeq
                 |> Map.union inputs.InputSettings }
     
@@ -52,12 +57,12 @@ module internal Inputs =
     /// can be set. Also note that "no downsampling" cannot be combined with other downsampling modes.
     let private sampleChannelSet inputChannels downsamplingMode inputs =
         if not (Set.isSubset inputChannels (enabledChannels inputs)) then
-            failwith "Cannot acquire an input which has no specified input settings."
+            invalidArg "Input channel" "Cannot acquire an input which has no specified input settings."
 
         if inputs.InputSampling <> Set.empty then
             if    (downsamplingMode =  Acquisition.NoDownsampling &&      hasDownsampling inputs)
                || (downsamplingMode <> Acquisition.NoDownsampling && not (hasDownsampling inputs)) then
-                failwith "Cannot combine inputs with downsampling and no downsampling in the same acquisition."
+                invalidArg "Input channel" "Cannot combine inputs with downsampling and no downsampling in the same acquisition."
 
         { inputs with
             InputSampling = 
@@ -70,11 +75,16 @@ module internal Inputs =
 
     /// Returns a modified set of acquisition inputs which has the specified input channel enabled with the
     /// given input settings. Fails if the channel is already enabled.
-    let enableChannel  channel  coupling range voltageOffset bandwidth = enableChannelSet (Set.singleton channel) coupling range voltageOffset bandwidth
+    let enableChannel channel coupling range voltageOffset bandwidth =
+        enableChannelSet (Set.singleton channel) (analogueSettings coupling range voltageOffset bandwidth)
 
     /// Returns a modified set of acquisition inputs which has the specified list of input channels enabled
     /// with the given input settings. Fails if any of the channels in the set is already enabled.
-    let enableChannels channels coupling range voltageOffset bandwidth = enableChannelSet (Set.ofList channels)   coupling range voltageOffset bandwidth
+    let enableChannels channels coupling range voltageOffset bandwidth =
+        enableChannelSet (Set.ofList channels) (analogueSettings coupling range voltageOffset bandwidth)
+
+    let enableDigitalChannels (ports : DigitalPort list) level =
+        enableChannelSet (ports |> List.map Digital |>  Set.ofList) (DigitalSettings <| { LogicLevel = level })
 
     /// Returns a modified set of acquisition inputs which has the specified input channel sampled with
     /// the given downsampling mode. Fails if the channel is not enabled. Also fails if the acquisition
@@ -94,7 +104,7 @@ module internal Inputs =
         inputs.InputSampling
         |> Set.map (fun sampling -> sampling.DownsamplingMode)
         |> downsamplingModeEnumForSet
-
+    
     /// Functions related to creating and managing acquisition buffers.
     module Buffers =
 
@@ -165,7 +175,6 @@ module internal Inputs =
             |> Seq.map allocatePinnedGCHandle
             |> Array.ofSeq
             |> disposableForGCHandles
-
 
         /// Creates a pinning handle for the given acquisition buffers which will prevent the garbage
         /// collector from moving them in order to defragment managed memory. This is required for native

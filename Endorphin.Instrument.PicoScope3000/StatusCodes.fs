@@ -1,10 +1,10 @@
 // Copyright (c) University of Warwick. All Rights Reserved. Licensed under the Apache License, Version 2.0. See LICENSE.txt in the project root for license information.
 
-namespace Endorphin.Instrument.PicoScope5000
+namespace Endorphin.Instrument.PicoScope3000
 
 module internal StatusCodes =
-
-    /// PicoScope 5000 series status codes indicating device status after all API calls.
+    /// PicoScope 3000 series status codes indicating device status after all API calls.
+    /// Must always be of type int.
     type StatusCode = 
         | Ok                                   = 0x0000
         | MaximumUnitsOpened                   = 0x0001
@@ -29,7 +29,7 @@ module internal StatusCodes =
         | StreamingFailed                      = 0x0014
         | BlockModeFailed                      = 0x0015
         | NullParameter                        = 0x0016
-        | EtsModeSet                           = 0x0017
+//      | EtsModeSet                           = 0x0017  -- Not supported on PicoScope 3000
         | DataNotAvailable                     = 0x0018
         | StringBufferTooSmall                 = 0x0019
         | EtsNotSupported                      = 0x001A
@@ -54,11 +54,11 @@ module internal StatusCodes =
         | Memory                               = 0x002D
         | SigGenParameter                      = 0x002E
         | ShotsSweepsWarning                   = 0x002F
-        | SigGenTriggerSource                  = 0x0030
-        | AuxOutputConflict                    = 0x0031
-        | AuxOutputEtsConflict                 = 0x0032
-        | WarnincExtThresholdConflict          = 0x0033
-        | WarningAuxOutputConflict             = 0x0034
+//      | SigGenTriggerSource                  = 0x0030 -- Not supported on PicoScope 3000
+//      | AuxOutputConflict                    = 0x0031 -- Not supported on PicoScope 3000
+//      | AuxOutputEtsConflict                 = 0x0032 -- Not supported on PicoScope 3000
+        | WarningExtThresholdConflict          = 0x0033
+//      | WarningAuxOutputConflict             = 0x0034 -- Not supported on PicoScope 3000
         | SigGenOutputOverVoltage              = 0x0035
         | DelayNull                            = 0x0036
         | InvalidBuffer                        = 0x0037
@@ -67,7 +67,7 @@ module internal StatusCodes =
         | Cancelled                            = 0x003A
         | SegmentNotUsed                       = 0x003B
         | InvalidCall                          = 0x003C
-        | GetValuesInterrupted                 = 0x003D
+//      | GetValuesInterrupted                 = 0x003D -- Not supported on PicoScope 3000
         | NotUsed                              = 0x003F
         | InvalidSampleRatio                   = 0x0040
         | InvalidState                         = 0x0041
@@ -77,11 +77,11 @@ module internal StatusCodes =
         | InvalidCoupling                      = 0x0045
         | BuffersNotSet                        = 0x0046
         | RatioModeNotSupported                = 0x0047
-        | RapidModeDoesNotSupportAggregation   = 0x0048
+//      | RapidModeDoesNotSupportAggregation   = 0x0048 -- Not supported on PicoScope 3000
         | InvalidTriggerProperty               = 0x0049
         | InterfaceNotConnected                = 0x004A
-        | ResistanceAndProbeNotAllowed         = 0x004B
-        | PowerFailed                          = 0x004C
+//      | ResistanceAndProbeNotAllowed         = 0x004B -- Not supported on PicoScope 3000
+//      | PowerFailed                          = 0x004C -- Not supported on PicoScope 3000
         | SigGenWaveformSetupFailed            = 0x004D
         | FpgaFailure                          = 0x004E
         | PowerManager                         = 0x004F
@@ -96,7 +96,7 @@ module internal StatusCodes =
         | PwqAndExternalClockClash             = 0x0059
         | UnableToOpenScalingFile              = 0x005A
         | MemoryClockFrequency                 = 0x005B
-        | I2CNotResponding                     = 0x005C
+        | I2cNotResponding                     = 0x005C
         | NoCapturesAvailable                  = 0x005D
         | NotUsedInThisCaptureMode             = 0x005E
         | GetDataActive                        = 0x0103
@@ -127,16 +127,15 @@ module internal StatusCodes =
         | PowerSupplyUnderVoltage              = 0x011C
         | CapturingData                        = 0x011D
         | Usb3DeviceNotUsb3Port                = 0x011E
-        | NotSupportedByThisDevice             = 0x011F
-        | InvalidDeviceResolution              = 0x0120
-        | InvalidNumberOfChannelsForResolution = 0x0121
-        | ChannelDisabledDueToUsbPower         = 0x0122
+//      | NotSupportedByThisDevice             = 0x011F -- Not supported on PicoScope 3000
+//      | InvalidDeviceResolution              = 0x0120 -- Not supported on PicoScope 3000
+//      | InvalidNumberOfChannelsForResolution = 0x0121 -- Not supported on PicoScope 3000
+//      | ChannelDisabledDueToUsbPower         = 0x0122 -- Not supported on PicoScope 3000
 
     /// Converts a status code to a string message describing it.
-    let statusMessage = 
-        function
+    let statusMessage = function
         | StatusCode.Ok -> "OK"
-        | StatusCode.MaximumUnitsOpened -> "An attempt has been made to open more than PS5000A_MAX_UNITS"
+        | StatusCode.MaximumUnitsOpened -> "An attempt has been made to open more than `PS3000A_MAX_UNITS`"
         | StatusCode.MemoryFailure -> "Not enough memory could be allocated on the host machine"
         | StatusCode.NotFound -> "No PicoScope could be found"
         | StatusCode.FirmwareFailure -> "Unable to download firmware"
@@ -161,71 +160,64 @@ module internal StatusCodes =
         | StatusCode.DataNotAvailable -> "No data is available from a run block call"
         | StatusCode.StringBufferTooSmall -> "The buffer passed for the information was too small"
         | StatusCode.EtsNotSupported -> "ETS is not supported on this device"
-        | StatusCode.AutoTriggerTimeTooShort -> 
-            "The auto trigger time is less than the time it will take to collect the pre-trigger data"
+        | StatusCode.AutoTriggerTimeTooShort -> "The auto trigger time is less than the time it will take to collect the pre-trigger data"
         | StatusCode.BufferStall -> "The collection of data has stalled as unread data would be overwritten"
         | StatusCode.TooManySamples -> "Number of samples requested is more than available in the current memory segment"
         | StatusCode.TooManySegments -> "Not possible to create number of segments requested"
-        | StatusCode.PulseWidthQualifier -> 
-            "A null pointer has been passed in the trigger function or one of the parameters is out of range"
+        | StatusCode.PulseWidthQualifier -> "A null pointer has been passed in the trigger function or one of the parameters is out of range"
         | StatusCode.Delay -> "One or more of the hold-off parameters are out of range"
         | StatusCode.SourceDetails -> "One or more of the source details are incorrect"
         | StatusCode.Conditions -> "One or more of the conditions are incorrect"
-        | StatusCode.UserCallback -> 
-            "The driver's thread is currently in the ps5000a...Ready callback function and therefore the action cannot be carried out"
-        | StatusCode.DeviceSampling -> 
-            "An attempt is being made to get stored data while streaming. Either stop streaming by calling ps5000aStop, or use ps5000aGetStreamingLatestValues"
+        | StatusCode.UserCallback -> "The driver's thread is currently in the `ps3000a...Ready` callback function and therefore the action cannot be carried out"
+        | StatusCode.DeviceSampling -> "An attempt is being made to get stored data while streaming. Either stop streaming by calling `ps3000aStop`, or use `ps3000aGetStreamingLatestValues`"
         | StatusCode.NoSamplesAvailable -> "No samples available because a run has not been completed"
         | StatusCode.SegmentOutOfRange -> "The memory index is out of range"
         | StatusCode.Busy -> "Data cannot be returned yet"
         | StatusCode.StartIndexInvalid -> "The start time to get stored data is out of range"
         | StatusCode.InvalidInfo -> "The information number requested is not a valid number"
-        | StatusCode.InfoUnavailable -> 
-            "The handle is invalid so no information is available about the device. Only PICO_DRIVER_VERSION is available"
+        | StatusCode.InfoUnavailable -> "The handle is invalid so no information is available about the device. Only PICO_DRIVER_VERSION is available"
         | StatusCode.InvalidSampleInterval -> "The sample interval selected for streaming is out of range"
         | StatusCode.TriggerError -> "Trigger error"
         | StatusCode.Memory -> "Driver cannot allocate memory"
-        | StatusCode.SigGenOutputOverVoltage -> 
-            "The combined peak to peak voltage and the analog offset voltage exceed the allowable voltage the signal generator can produce"
+        | StatusCode.SigGenParameter -> "Incorrect parameter passed to the signal generator"
+        | StatusCode.ShotsSweepsWarning -> "Conflict between the `shots` and `sweeps` parameters sent to the signal generator"
+        | StatusCode.WarningExtThresholdConflict -> "Attempt to set different EXT input thresholds set for signal generator and oscilloscope trace"
+        | StatusCode.SigGenOutputOverVoltage -> "The combined peak to peak voltage and the analog offset voltage exceed the allowable voltage the signal generator can produce"
         | StatusCode.DelayNull -> "NULL pointer passed as delay parameter"
         | StatusCode.InvalidBuffer -> "The buffers for overview data have not been set while streaming"
         | StatusCode.SigGenOffsetVoltage -> "The analog offset voltage is out of range"
         | StatusCode.SigGenPeakToPeak -> "The analog peak to peak voltage is out of range"
         | StatusCode.Cancelled -> "A block collection has been cancelled"
         | StatusCode.SegmentNotUsed -> "The segment index is not currently being used"
-        | StatusCode.InvalidCall -> "The wrong GetValues function has been called for the collection mode in use"
+        | StatusCode.InvalidCall -> "The wrong `GetValues` function has been called for the collection mode in use"
         | StatusCode.NotUsed -> "The function is not available"
         | StatusCode.InvalidSampleRatio -> "The aggregation ratio requested is out of range"
         | StatusCode.InvalidState -> "Device is in an invalid state"
         | StatusCode.NotEnoughSegments -> "The number of segments allocated is fewer than the number of captures requested"
         | StatusCode.DriverFunction -> "You called a driver function while another driver function was still being processed"
-        | StatusCode.InvalidCoupling -> "An invalid coupling type was specified in ps5000aSetChannel"
+        | StatusCode.InvalidCoupling -> "An invalid coupling type was specified in `ps3000aSetChannel`"
         | StatusCode.BuffersNotSet -> "An attempt was made to get data before a data buffer was defined"
         | StatusCode.RatioModeNotSupported -> "The selected downsampling mode (used for data reduction) is not allowed"
-        | StatusCode.InvalidTriggerProperty -> "An invalid parameter was passed to ps5000aSetTriggerChannelProperties"
+        | StatusCode.InvalidTriggerProperty -> "An invalid parameter was passed to `ps3000aSetTriggerChannelProperties`"
         | StatusCode.InterfaceNotConnected -> "The driver was unable to contact the oscilloscope"
-        | StatusCode.SigGenWaveformSetupFailed -> "A problem occurred in ps5000aSetSigGenBuiltIn or ps5000aSetSigGenArbitrary"
+        | StatusCode.SigGenWaveformSetupFailed -> "A problem occurred in `ps3000aSetSigGenBuiltIn` or `ps3000aSetSigGenArbitrary`"
         | StatusCode.FpgaFailure -> "FPGA not successfully set up"
         | StatusCode.PowerManager -> "Power manager error"
-        | StatusCode.InvalidAnalogueOffset -> "impossible analogue offset value was specified in ps5000aSetChannel"
+        | StatusCode.InvalidAnalogueOffset -> "impossible analogue offset value was specified in `ps3000aSetChannel`"
         | StatusCode.PllLockFailed -> "Unable to configure the PicoScope"
         | StatusCode.AnalogBoard -> "The oscilloscope's analog board is not detected, or is not connected to the digital board"
         | StatusCode.ConfigFailureAwg -> "Unable to configure the signal generator"
         | StatusCode.InitialiseFpga -> "The FPGA cannot be initialized, so unit cannot be opened"
         | StatusCode.ExternalFrequencyInvalid -> "The frequency for the external clock is not within +/-5% of the stated value"
         | StatusCode.ClockChangeError -> "The FPGA could not lock the clock signal"
-        | StatusCode.TriggerAndExternalClockClash -> 
-            "You are trying to configure the AUX input as both a trigger and a reference clock"
-        | StatusCode.PwqAndExternalClockClash -> 
-            "You are trying to congfigure the AUX input as both a pulse width qualifier and a reference clock"
+        | StatusCode.TriggerAndExternalClockClash -> "You are trying to configure the AUX input as both a trigger and a reference clock"
+        | StatusCode.PwqAndExternalClockClash -> "You are trying to congfigure the AUX input as both a pulse width qualifier and a reference clock"
         | StatusCode.UnableToOpenScalingFile -> "The scaling file set can not be opened"
         | StatusCode.MemoryClockFrequency -> "The frequency of the memory is reporting incorrectly"
-        | StatusCode.I2CNotResponding -> "The I2C that is being actioned is not responding to requests"
+        | StatusCode.I2cNotResponding -> "The I2C that is being actioned is not responding to requests"
         | StatusCode.NoCapturesAvailable -> "There are no captures available and therefore no data can be returned"
-        | StatusCode.NotUsedInThisCaptureMode -> 
-            "The capture mode the device is currently running in does not support the current request"
-        | StatusCode.IpNetworked -> 
-            "The device is currently connected via the IP Network socket and thus the call made is not supported"
+        | StatusCode.NotUsedInThisCaptureMode -> "The capture mode the device is currently running in does not support the current request"
+        | StatusCode.IpNetworked -> "The device is currently connected via the IP Network socket and thus the call made is not supported"
         | StatusCode.InvalidIpAddress -> "An IP address that is not correct has been passed to the driver"
         | StatusCode.IpSocketFailed -> "The IP socket has failed"
         | StatusCode.IpSocketTimeout -> "The IP socket has timed out"
@@ -237,21 +229,22 @@ module internal StatusCodes =
         | StatusCode.BandwidthNotSupported -> "Bandwidth limit is not supported on the opened device"
         | StatusCode.InvalidBandwidth -> "The value requested for the bandwidth limit is out of range"
         | StatusCode.AwgNotSupported -> "The arbitrary waveform generator is not supported by the opened device"
-        | StatusCode.EtsNotRunning -> 
-            "Data has been requested with ETS mode set but run block has not been called, or stop has been called"
+        | StatusCode.EtsNotRunning -> "Data has been requested with ETS mode set but run block has not been called, or stop has been called"
         | StatusCode.SigGenWhiteNoiseNotSupported -> "White noise is not supported on the opened device"
         | StatusCode.SigGenWaveTypeNotSupported -> "The wave type requested is not supported by the opened device"
-        | StatusCode.EtsNotAvailableWithLogicChannels -> 
-            "When a digital port is enabled, ETS sample mode is not available for use"
+        | StatusCode.InvalidDigitalPort -> "A port number that does not evaluate to either `PS3000A_DIGITAL_PORT0` or `PS3000A_DIGITAL_PORT1`, the ports that are supported"
+        | StatusCode.InvalidDigitalChannel -> "The digital channel is not in the range `PS3000A_DIGITAL_CHANNEL0` to `PS3000A_DIGITAL_CHANNEL15`, the digital channels that are supported"
+        | StatusCode.InvalidDigitalTriggerDirection -> "The digital trigger direction is not a valid trigger direction and should be equal in value to one of the `PS3000A_DIGITAL_DIRECTION` enumerations"
+        | StatusCode.SigGenPrbsNotSupported -> "Siggen does not generate pseudo-random bit stream"
+        | StatusCode.EtsNotAvailableWithLogicChannels -> "When a digital port is enabled, ETS sample mode is not available for use"
         | StatusCode.PowerSupplyConnected -> "The DC power supply is connected"
         | StatusCode.PowerSupplyNotConnected -> "The DC power supply isn’t connected"
         | StatusCode.PowerSupplyRequestInvalid -> "Incorrect power mode passed for current power source"
         | StatusCode.PowerSupplyUnderVoltage -> "The supply voltage from the USB source is too low"
-        | StatusCode.CapturingData -> "The device is currently busy capturing data"
+        | StatusCode.CapturingData -> "The oscilloscope is in the process of capturing data"
         | StatusCode.Usb3DeviceNotUsb3Port -> "A Pico USB 3.0 device has been connected to a non-USB 3.0 port"
-        | StatusCode.NotSupportedByThisDevice -> "A function has been called that is not supported by the current device variant"
-        | StatusCode.InvalidDeviceResolution -> "The device resolution is invalid (out of range)"
-        | StatusCode.InvalidNumberOfChannelsForResolution -> 
-            "The number of channels which can be enabled is limited in 15 and 16-bit modes"
-        | StatusCode.ChannelDisabledDueToUsbPower -> "USB Power not sufficient to power all channels"
+//      | StatusCode.NotSupportedByThisDevice -> "A function has been called that is not supported by the current device variant"
+//      | StatusCode.InvalidDeviceResolution -> "The device resolution is invalid (out of range)"
+//      | StatusCode.InvalidNumberOfChannelsForResolution -> "The number of channels which can be enabled is limited in 15 and 16-bit modes"
+//      | StatusCode.ChannelDisabledDueToUsbPower -> "USB Power not sufficient to power all channels"
         | status -> sprintf "Failed with unexpected StatusCode value: %A" status
