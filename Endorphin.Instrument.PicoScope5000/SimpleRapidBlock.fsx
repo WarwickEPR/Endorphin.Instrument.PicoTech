@@ -41,7 +41,7 @@ let experiment picoScope = async {
 
     // wait for the acquisition to finish automatically or by cancellation
     let! result = Acquisition.waitToFinish acquisitionHandle
-    match result with0
+    match result with
     | AcquisitionCompleted -> printfn "Stream completed successfully."
     | AcquisitionError exn -> printfn "Stream failed: %s" exn.Message
     | AcquisitionCancelled -> printfn "Stream cancelled successuflly." }
