@@ -4,6 +4,7 @@ namespace Endorphin.Instrument.PicoScope5000
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Endorphin.Core
+open Endorphin.Utilities.TimeInterval
 open NativeModel
 open StatusCodes
 
@@ -379,3 +380,4 @@ module internal Parsing =
               Function              = function'
               PlaybackSettings      = playbackSettings
               TriggerSettings       = triggerSettings }
+

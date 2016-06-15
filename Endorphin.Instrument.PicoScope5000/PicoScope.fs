@@ -9,6 +9,8 @@ open Parsing
 open StatusCodes
 open NativeModel
 open Endorphin.Core
+open Endorphin.Utilities.TimeInterval
+open System.Runtime.InteropServices
 
 [<RequireQualifiedAccess>]
 /// Functions for performing commands and sending requests to a PicoScope 5000 series device.
@@ -279,7 +281,7 @@ module PicoScope =
                     let status = NativeApi.GetTimebase (handle device, timebase, 0, &interval, &maxSamples, index)
                     match status with
                     | StatusCode.TooManySamples -> Choice.succeed None
-                    | _                         -> status |> checkStatusAndReturn (Some (Interval_ns (nanosec <| interval), maxSamples))) 
+                    | _                         -> status |> checkStatusAndReturn (Some <| (interval |> (nanosec >> fromNanoseconds), maxSamples))) 
 
         /// Asynchronously queries the parameters for the specified timebase on a PicoScope 5000 series
         /// device with the current vertical resolution.
@@ -606,31 +608,33 @@ module PicoScope =
                     |> checkStatusAndReturn (parseIntervalWithInterval (int hardwareInterval, timeUnit)))
 
 
-        let private runBlock' (acquisition : BlockAcquisition) timebase device =
-            let mutable timeIndisposed : int = 0
-            let parameters = acquisition.Parameters
-            let guard = new Async.ContinuationGuard ()
+        let private runBlock' (acquisition : BlockAcquisition) timebase startSegment device =
+
+            // Defer continuation from the callback
+            let monitor = new Async.DeferredContinuation<unit>()
+
+            // Construct the callback and pin using its delegate
+            let blockReadyStatus _ status _ =
+                match checkStatus status with
+                | Success _ -> monitor.Continue()
+                | Failure exn -> monitor.Error exn
+            let callbackDelegate = PicoScopeBlockReady(blockReadyStatus)
+            monitor.CallbackHandle <- GCHandle.Alloc(callbackDelegate)
 
             async {
+                // Guard the setup procedure continuations
+                let guard = new Async.ContinuationGuard ()
                 let! ct = Async.CancellationToken // get the token for this context
 
-                // On success, continue with a Choice.Success via cont
-                // On failure, return with a Choice.Failure via cont
-                // On cancellation in this scope, continue via ccont
-                // The exception continuation is not used
-                // Exactly one continuation function must be called
-                let continuations (cont,econt,ccont) =
+                let setupCallback (cont,econt,ccont) =
+                    let mutable timeIndisposed : int = 0
+                    let parameters = acquisition.Parameters
 
                     // On cancellation in this scope, just pass control to the cancellation continuation
                     let cancellationCompensation() =
                         if guard.Cancel then
                             OperationCanceledException() |> ccont
-                    use reg = ct.Register <| Action cancellationCompensation
-
-                    // Handling the callback. On success or error continue via cont
-                    let blockReadyStatus _ status _ =
-                        if guard.Finish then
-                            checkStatus status |> cont
+                    use __ = ct.Register <| Action cancellationCompensation
 
                     // Set up the callback. On failure continue via cont
                     try
@@ -639,19 +643,30 @@ module PicoScope =
                                             parameters.PostTriggerSamples,
                                             timebase,
                                             &timeIndisposed,
-                                            MemorySegment.zero, // Always use the first memory segment for single acquisitions
-                                            PicoScopeBlockReady(blockReadyStatus),
+                                            startSegment,
+                                            callbackDelegate,
                                             nativeint 0) |> checkStatus |> Choice.bindOrRaise
-                    with
-                    | exn -> if guard.Finish then Choice.fail exn |> cont
+                    with exn ->
+                        if guard.Finish then Choice.fail exn |> cont
+                
+                    if guard.Finish then Choice.succeed() |> cont
 
-                return! Async.FromContinuations continuations }
+                let wait (cont,econt,ccont) =
+                    monitor.RegisterContinuations((cont,econt,ccont))
+                    ()
 
-        let runBlock (PicoScope5000 picoScope) (acquisition : BlockAcquisition) timebase =
+                let setup = Async.FromContinuations setupCallback
+                let waitHandle = Async.FromContinuations wait
+
+                let! result = setup
+                return result |> Choice.map (fun _ -> waitHandle) }
+
+        let runBlock (PicoScope5000 picoScope) (acquisition : BlockAcquisition) timebase startSegment =
             let description = sprintf "Start block acquisition: %+A" acquisition
             async {
                 let parameters = acquisition.Common.Parameters
-                return! picoScope |> CommandRequestAgent.performCommandAsync description (runBlock' acquisition timebase)  }
+                let a = runBlock' acquisition timebase startSegment
+                return! picoScope |> CommandRequestAgent.performObjectRequestAsync description a  }
         
         let private downsamplingMode (acq:AcquisitionCommon) =
             acq.Parameters.Inputs.InputSampling

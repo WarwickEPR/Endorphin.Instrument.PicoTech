@@ -4,6 +4,7 @@
 #r "../packages/Rx-Interfaces.2.2.5/lib/net45/System.Reactive.Interfaces.dll"
 #r "../packages/Rx-Core.2.2.5/lib/net45/System.Reactive.Core.dll"
 #r "../packages/FSharp.Charting.0.90.13/lib/net40/FSharp.Charting.dll"
+#r "../Endorphin.Utilities.TimeInterval/bin/Debug/Endorphin.Utilities.TimeInterval.dll"
 #r "bin/Debug/Endorphin.Instrument.PicoScope5000.dll"
 #r "System.Windows.Forms.DataVisualization.dll"
 #r "../packages/log4net.2.0.3/lib/net40-full/log4net.dll"
@@ -11,6 +12,7 @@
 open System
 open FSharp.Control.Reactive
 open Endorphin.Instrument.PicoScope5000
+open Endorphin.Utilities.TimeInterval
 
 [<AutoOpen>]
 module Common =
@@ -34,6 +36,11 @@ module Common =
     let printSampled inputs acquisition =
         Signal.voltageByTime inputs acquisition
         |> Observable.sample (TimeSpan.FromMilliseconds 50.0)
+        |> Observable.add (printfn "Sample: %A")
+
+    let printSampledBlocks inputs acquisition =
+        Signal.voltagesByBlock inputs acquisition
+        |> Observable.sample (TimeSpan.FromMilliseconds 500.0)
         |> Observable.add (printfn "Sample: %A")
 
     let printSampledDigital input acquisition =

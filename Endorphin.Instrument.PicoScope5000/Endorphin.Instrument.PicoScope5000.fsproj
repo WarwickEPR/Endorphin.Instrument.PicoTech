@@ -58,7 +58,6 @@
     <Compile Include="Model.fs" />
     <Compile Include="Parsing.fs" />
     <Compile Include="ChannelSettings.fs" />
-    <Compile Include="Quantities.fs" />
     <Compile Include="Device.fs" />
     <Compile Include="TriggerSettings.fs" />
     <Compile Include="SignalGenerator.fs" />
@@ -82,8 +81,14 @@
     <None Include="SimpleRapidBlock.fsx" />
     <None Include="SimpleRapidBlockChart.fsx" />
     <None Include="DownsampledRapidBlock.fsx" />
+    <None Include="RapidBlockPartial.fsx" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Endorphin.Utilities.TimeInterval\Endorphin.Utilities.TimeInterval.fsproj">
+      <Name>Endorphin.Utilities.TimeInterval</Name>
+      <Project>{b9534494-747d-4623-a0e7-fb8e53678988}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="FSharp.Control.Reactive">
       <HintPath>..\packages\FSharp.Control.Reactive.3.2.0\lib\net40\FSharp.Control.Reactive.dll</HintPath>
       <Private>True</Private>

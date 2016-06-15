@@ -51,9 +51,9 @@ module internal AcquisitionCommon =
         let prepareDevice acquisition = async {
             let acq = common acquisition
             acq.StatusChanged.Trigger (Next PreparingAcquisition)
-            do! PicoScope.ChannelSettings.setAcquisitionInputChannels acq.PicoScope acq.Parameters.Inputs }
-            // let toAdc = Trigger.Streaming.thresholdToAdc acq.Parameters
-            // do! PicoScope.Triggering.setTrigger acq.PicoScope toAdc acq.Parameters.Trigger }
+            do! PicoScope.ChannelSettings.setAcquisitionInputChannels acq.PicoScope acq.Parameters.Inputs
+//            let toAdc = Trigger.thresholdToAdc acq.Parameters
+            do! PicoScope.Triggering.setTriggerSettings acq.PicoScope acq.Parameters.Trigger }
 
         /// Check on the consistency and correctness of acquisition parameters
         let private checkDownsampling parameters =

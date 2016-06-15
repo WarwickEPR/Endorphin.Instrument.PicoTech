@@ -6,6 +6,7 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 
 open Endorphin.Core.CommandRequestAgent
 open Endorphin.Core
+open Endorphin.Utilities.TimeInterval
 
 [<AutoOpen>]
 /// PicoScope 5000 series high level model types.
@@ -26,42 +27,6 @@ module Model =
 
     /// Indicates whether the driver thread was busy during an API call.
     type internal Availability = Available | Busy
-
-    /// Time interval with unit of measure.
-    [<CustomEquality; CustomComparison>]
-    type Interval =
-        internal
-        | Interval_fs of interval : int<fs>
-        | Interval_ps of interval : int<ps>
-        | Interval_ns of interval : int<ns>
-        | Interval_us of inverval : int<us>
-        | Interval_ms of interval : int<ms>
-        | Interval_s  of interval : int<s>
-        member internal this.InFemtoseconds =
-            let toFs m x = (int64 x) * (int64 m) * 1L<fs>
-            match this with
-            | Interval_fs interval -> interval * 1</fs> |> toFs 1e0<fs>
-            | Interval_ps interval -> interval * 1</ps> |> toFs 1e3<fs>
-            | Interval_ns interval -> interval * 1</ns> |> toFs 1e6<fs>
-            | Interval_us interval -> interval * 1</us> |> toFs 1e9<fs>
-            | Interval_ms interval -> interval * 1</ms> |> toFs 1e12<fs>
-            | Interval_s  interval -> interval * 1</s>  |> toFs 1e15<fs>
-        override x.GetHashCode() = hash x.InFemtoseconds
-        override x.Equals(other) =
-            match other with | :? Interval as y -> x.InFemtoseconds = y.InFemtoseconds | _ -> false
-        interface System.IComparable<Interval> with
-            member x.CompareTo y = compare x.InFemtoseconds y.InFemtoseconds
-        interface System.IComparable with
-            member x.CompareTo other =
-                match other with | :? Interval as y -> compare x.InFemtoseconds y.InFemtoseconds | _ -> -1
-        override interval.ToString() =
-            match interval with
-            | Interval_fs i -> sprintf "%d fs" i
-            | Interval_ps i -> sprintf "%d ps" i
-            | Interval_ns i -> sprintf "%d ns" i
-            | Interval_us i -> sprintf "%d us" i
-            | Interval_ms i -> sprintf "%d ms" i
-            | Interval_s  i -> sprintf "%d s"  i
 
     /// Voltage with unit of measure.
     type Voltage = float32<V>
@@ -141,7 +106,6 @@ module Model =
 
         /// A channel which can be used to trigger acquisition.
         type TriggerChannel =
-            internal
             | InputChannelTrigger of inputChannel : InputChannel
             | ExternalTrigger
             | AuxiliaryTrigger
@@ -363,6 +327,7 @@ module Model =
         /// Status of an acquisition emitted through a status event while the acquisition is in progress.
         type AcquisitionStatus =
             | PreparingAcquisition
+            | AwaitingTrigger
             | Acquiring of sampleInterval : Interval
             | FinishedCapture of index : Capture
             | FinishedAcquisition of stoppedAutomatically : bool

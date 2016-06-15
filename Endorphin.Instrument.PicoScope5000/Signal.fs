@@ -6,6 +6,7 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Endorphin.Core
 open FSharp.Control.Reactive
 open System.Reactive.Concurrency
+open Endorphin.Utilities.TimeInterval
 
 /// Functions for obtaining the signal projections for an acquisition.
 module Signal =
@@ -14,13 +15,13 @@ module Signal =
         acquisition |> (Acquisition.status >> Observable.last >> Observable.takeUntilOther)
 
     /// Computes the timestamp of a sample for the given index and sample interval.
-    let private time interval (downsampling : DownsamplingRatio option) index =
+    let private time (interval : Interval) (downsampling : DownsamplingRatio option) index =
         let ratio =
             match downsampling with
             | None -> 1.0
             | Some ratio -> float ratio
 //        printfn "Time: %s" (Interval.asString interval)
-        (Interval.asSeconds interval) * (float index) * ratio
+        interval.AsFloatSeconds * (float index) * ratio
 
     /// Returns a function which converts an ADC count to a voltage for the given input sampling in an
     /// acquisition.
@@ -326,7 +327,7 @@ module Signal =
     /// in an acquisition.
     let private adcCountsByBlockEvent inputs acquisition =
         samplesObserved acquisition
-        |> Event.map (fun samples -> samples.Samples |> Map.findArray inputs)
+        |> Event.map (fun samples -> samples.Samples |> Map.findArray inputs )
 
     /// Returns an observable which emits an array of ADC count blocks for each sample block observed for
     /// the given array of inputs in an acquisition.
@@ -338,7 +339,7 @@ module Signal =
     /// given array of inputs in an acquisition.
     let voltagesByBlock inputs acquisition = 
         adcCountsByBlockEvent inputs acquisition
-        |> Event.map (Array.map (fun adcCounts -> adcCountsToVoltages inputs (acquisitionParameters acquisition) adcCounts))
+        |> Event.map (Array.mapi (fun i -> Array.map (adcCountToVoltage inputs.[i] (acquisitionParameters acquisition))))
         |> takeUntilFinished acquisition
 
     /// Helper function for constructing observables which buffer a specified number of the latest samples

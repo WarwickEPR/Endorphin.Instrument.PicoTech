@@ -29,7 +29,7 @@ module Trigger =
           AdcThreshold       = adcThreshold
           ThresholdDirection = levelThreshold
           StartSample        = startSample
-          AutoTrigger        = None }
+          AutoTrigger        = None } |> SimpleTrigger
     
     /// Specifies simple trigger settings with the provided trigger channel and auto-trigger.
     let simpleAndAuto triggerChannel adcThreshold levelThreshold startSample autoTriggerDelay =
@@ -37,4 +37,6 @@ module Trigger =
           AdcThreshold       = adcThreshold
           ThresholdDirection = levelThreshold
           StartSample        = startSample
-          AutoTrigger        = Some <| AutoTriggerDelay_ms autoTriggerDelay }
+          AutoTrigger        = Some <| AutoTriggerDelay_ms autoTriggerDelay } |> SimpleTrigger
+
+    
