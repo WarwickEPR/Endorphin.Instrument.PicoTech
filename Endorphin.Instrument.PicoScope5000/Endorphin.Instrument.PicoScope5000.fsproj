@@ -71,8 +71,6 @@
     <Compile Include="Signal.fs" />
     <None Include="StreamingDemo.fsx" />
     <None Include="NVSpectrometer.fsx" />
-    <Content Include="app.config" />
-    <Content Include="packages.config" />
     <None Include="Common.fsx" />
     <None Include="SimpleBlock.fsx" />
     <None Include="SimpleBlockChart.fsx" />
@@ -82,6 +80,8 @@
     <None Include="SimpleRapidBlockChart.fsx" />
     <None Include="DownsampledRapidBlock.fsx" />
     <None Include="RapidBlockPartial.fsx" />
+    <Content Include="app.config" />
+    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Endorphin.Utilities.TimeInterval\Endorphin.Utilities.TimeInterval.fsproj">
