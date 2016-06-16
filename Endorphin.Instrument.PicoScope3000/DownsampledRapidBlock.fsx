@@ -5,11 +5,12 @@ open System
 open System.Threading
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Endorphin.Instrument.PicoScope3000
+open Endorphin.Utilities.TimeInterval
 
 //log4net.Config.BasicConfigurator.Configure()
 
 let rapidBlockParametersNoDownsampling =
-    Parameters.Acquisition.create (Interval.fromNanoseconds 12<ns>) (1<<<10)
+    Parameters.Acquisition.create (TimeInterval.fromNanoseconds 12<ns>) (1<<<10)
     |> Parameters.Acquisition.enableChannel ChannelB DC Range_50mV 0.0f<V> FullBandwidth
     |> Parameters.Acquisition.sampleChannel ChannelB Averaged
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_100mV 0.0f<V> FullBandwidth

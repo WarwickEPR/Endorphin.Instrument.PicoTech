@@ -68,9 +68,7 @@
     <Compile Include="Acquisition.fs" />
     <Compile Include="Signal.fs" />
     <None Include="StreamingDemo.fsx" />
-    <Content Include="packages.config" />
     <None Include="TriggerExercise.fsx" />
-    <None Include="exception-test.fsx" />
     <None Include="Common.fsx" />
     <None Include="SimpleBlock.fsx" />
     <None Include="SimpleBlockChart.fsx" />
@@ -79,6 +77,7 @@
     <None Include="SimpleRapidBlock.fsx" />
     <None Include="SimpleRapidBlockChart.fsx" />
     <None Include="DownsampledRapidBlock.fsx" />
+    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Endorphin.Utilities.TimeInterval\Endorphin.Utilities.TimeInterval.fsproj">

@@ -7,6 +7,7 @@
 #r "../packages/Rx-Core.2.2.5/lib/net45/System.Reactive.Core.dll"
 #r "../packages/FSharp.Charting.0.90.13/lib/net40/FSharp.Charting.dll"
 #r "bin/Debug/Endorphin.Instrument.PicoScope3000.dll"
+#r "../Endorphin.Utilities.TimeInterval/bin/Debug/Endorphin.Utilities.TimeInterval.dll"
 #r "System.Windows.Forms.DataVisualization.dll"
 #r "../packages/log4net.2.0.3/lib/net40-full/log4net.dll"
 
@@ -19,6 +20,7 @@ open FSharp.Charting
 open FSharp.Control.Reactive
 
 open Endorphin.Instrument.PicoScope3000
+open Endorphin.Utilities.TimeInterval
 
 //log4net.Config.BasicConfigurator.Configure()
 
@@ -30,7 +32,7 @@ form.Closed |> Observable.add (fun _ -> cts.Cancel())
 
  // define the streaming parameters: 64 kSample buffer seems to give good rate with low loss for fast sample rates
 let streamingParametersAveraged = 
-    Parameters.Acquisition.create (Interval.fromMicroseconds 10<us>) (1<<<17) // 64ks
+    Parameters.Acquisition.create (TimeInterval.fromMicroseconds 10<us>) (1<<<17) // 64ks
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_200mV 0.0f<V> FullBandwidth
     |> Parameters.Acquisition.sampleChannel ChannelA Averaged
     |> Parameters.Acquisition.withDownsamplingRatio 100u
@@ -40,7 +42,7 @@ let streamingParametersAveraged =
 let inputAveraged = (Analogue ChannelA, AveragedBuffer)
 
 let streamingParametersDigital =
-    Parameters.Acquisition.create (Interval.fromNanoseconds 60<ns>) (1<<<15) // 64ks
+    Parameters.Acquisition.create (TimeInterval.fromNanoseconds 60<ns>) (1<<<15) // 64ks
     |> Parameters.Acquisition.enableDigitalPort Port0 1.0f<V>
     |> Parameters.Acquisition.sampleDigitalPort Port0 NoDownsampling
     |> Parameters.Streaming.create
@@ -49,7 +51,7 @@ let streamingParametersDigital =
 let inputDigital = (Digital Port0, NoDownsamplingBuffer)
 
 let streamingParametersNoDownsampling =
-    Parameters.Acquisition.create (Interval.fromNanoseconds 800<ns>) (1<<<18)
+    Parameters.Acquisition.create (TimeInterval.fromNanoseconds 800<ns>) (1<<<18)
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_20mV 0.0f<V> FullBandwidth
     |> Parameters.Acquisition.sampleChannel ChannelA NoDownsampling
     |> Parameters.Acquisition.withTrigger (Trigger.auto 10s<ms>)
@@ -63,7 +65,7 @@ let simpleTrigger = Trigger.General.simple Range_1V Simple.Rising 0.0f<V> (Analo
 let advTrigger = Trigger.General.complex 
 
 let blockParametersNoDownsampling =
-    Parameters.Acquisition.create (Interval.fromPicoseconds 1200<ps>) (1<<<17)
+    Parameters.Acquisition.create (TimeInterval.fromPicoseconds 1200<ps>) (1<<<17)
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_20mV 0.0f<V> FullBandwidth
     |> Parameters.Acquisition.sampleChannel ChannelA NoDownsampling
     |> Parameters.Acquisition.withTrigger (Trigger.auto 50s<ms>)
@@ -74,7 +76,7 @@ let blockParametersNoDownsampling =
 let inputBlockNoDownsampling = (Analogue ChannelA, NoDownsamplingBuffer)
 
 let rapidBlockParametersNoDownsampling =
-    Parameters.Acquisition.create (Interval.fromPicoseconds 1200<ps>) (1<<<17)
+    Parameters.Acquisition.create (TimeInterval.fromPicoseconds 1200<ps>) (1<<<17)
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_20mV 0.0f<V> FullBandwidth
     |> Parameters.Acquisition.sampleChannel ChannelA NoDownsampling
     |> Parameters.Acquisition.withTrigger (Trigger.auto 50s<ms>)
@@ -86,7 +88,7 @@ let rapidBBlockNoDownsampling = (Analogue ChannelA, NoDownsamplingBuffer)
 
 
 let streamingParameters2 =
-    Parameters.Acquisition.create (Interval.fromNanoseconds 20<ns>) 50000
+    Parameters.Acquisition.create (TimeInterval.fromNanoseconds 20<ns>) 50000
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_200mV 0.0f<V> FullBandwidth
     |> Parameters.Acquisition.enableChannel ChannelB DC Range_20mV 0.0f<V> FullBandwidth
     |> Parameters.Acquisition.sampleChannels [ ChannelA ; ChannelB ] Aggregate
