@@ -30,7 +30,7 @@ let parameters =
 /// Returns an observable sequence of CW EPR sample blocks from the streaming acquisition.
 let samplesForAcquisition acquisition =
     let inputs = channels |> List.map (fun channel -> (channel, AveragedBuffer)) |> Array.ofList
-    Signal.voltagesByBlock inputs acquisition
+    Signal.Block.voltages inputs acquisition
 
 let processSamples =
     printfn "Process Samples called"

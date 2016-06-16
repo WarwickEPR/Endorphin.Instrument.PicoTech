@@ -20,7 +20,6 @@ module Signal =
             match downsampling with
             | None -> 1.0
             | Some ratio -> float ratio
-//        printfn "Time: %s" (Interval.asString interval)
         interval.AsFloatSeconds * (float index) * ratio
 
     /// Returns a function which converts an ADC count to a voltage for the given input sampling in an
@@ -55,20 +54,6 @@ module Signal =
             samples.Samples
             |> Map.findArray inputs
             |> Array.map (fun block -> block.[i]) }
-        
-    /// Returns the n-th signal from an observable which emits an array of signals at each observation.
-    let nth n = Observable.map (fun samples -> Array.get samples n)
-
-    /// Takes the n-th and m-th signals from an observable which emits an array of signals at each
-    /// observation and combines them into a tuple.
-    let takeXY n m = Observable.map (fun samples -> (Array.get samples n, Array.get samples m))
-
-    /// Takes the n-th and m-th signals from an observable which emits an array of indexed or timestamped
-    /// signals at each observation and combines the values into a tuple, discarding the indecies.
-    let takeXYFromIndexed n m = Observable.map (fun (_, samples) -> (Array.get samples n, Array.get samples m))
-
-    /// Accumulates a signal, emitting the sequence of samples observed so far at each observation.
-    let scan signal = Observable.scanInit List.empty List.cons signal |> Observable.map Seq.ofList
 
     let private samplesObserved acquisition =
         (common acquisition).SamplesObserved.Publish
@@ -120,267 +105,289 @@ module Signal =
         adcCountEvent input acquisition
         |> Observable.combineLatest (fun interval adc -> (interval,adc)) (sampleIntervalEvent acquisition)
 
-    let blockSampleCount input acquisition =
-        samplesObserved acquisition
-        |> Event.map (fun block -> block.Length)
-
-    /// Returns an observable which emits the ADC count for every sample observed on the specified input
-    /// in an acquisition.
-    let adcCount input acquisition =
-        adcCountEvent input acquisition
-        |> takeUntilFinished acquisition
-
-    /// Returns an observable which emits the voltage for every sample observed on the specified input in
-    /// an acquisition.
-    let voltage input acquisition =
-        adcCountEvent input acquisition
-        |> Observable.map (adcCountToVoltage input (acquisitionParameters acquisition))
-        |> takeUntilFinished acquisition
-
-    /// Returns an observable which emits the byte representation of every sample observed on a digital port
-    let digitalByte input acquisition =
-        adcCountEvent input acquisition
-        |> Observable.map rawToByte
-        |> takeUntilFinished acquisition
-
-    /// Returns an observable which emits the state of a single bit for every sample observed on a digital port
-    let digitalBit bit input acquisition =
-        adcCountEvent input acquisition
-        |> Observable.map (rawToBit bit)
-        |> takeUntilFinished acquisition
-
-
-    /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
-    /// function and ADC count for every sample observed on the specified input in an acquisition.
-    let adcCountBy indexMapping input acquisition =
-        adcCountEvent input acquisition
-        |> Observable.mapi (fun i adcCount -> (indexMapping i, adcCount))
-        |> takeUntilFinished acquisition
-
-    /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
-    /// function and voltage for every sample observed on the specified input in an acquisition.
-    let voltageBy indexMapping input acquisition =
-        adcCountEvent input acquisition
-        |> Observable.mapi (fun i adcCount -> (indexMapping i, adcCountToVoltage input (acquisitionParameters acquisition) adcCount))
-        |> takeUntilFinished acquisition
-
-    /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
-    /// function and voltage for every sample observed on the specified input in an acquisition.
-    let digitalByteBy indexMapping input acquisition =
-        adcCountEvent input acquisition
-        |> Observable.mapi (fun i raw -> (indexMapping i, rawToByte raw))
-        |> takeUntilFinished acquisition
-
-    /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
-    /// function and voltage for every sample observed on the specified input in an acquisition.
-    let digitalBitBy bit indexMapping input acquisition =
-        adcCountEvent input acquisition
-        |> Observable.mapi (fun i raw -> (indexMapping i, (rawToBit bit) raw))
-        |> takeUntilFinished acquisition
-
-    /// Returns an observable which emits a tuple of sample index and ADC count for every sample observed
-    /// on the specified input in an acquisition.
-    let adcCountByIndex = adcCountBy id
-
-    /// Returns an observable which emits a tuple of timestamp and ADC count for every sample observed on
-    /// the specified input in an acquisition.
-    let adcCountByTime input (acquisition:Acquisition) =
-        // Use Observable.defer to wait on status to get the Acquisition interval
-        // then return the adcCounts with the time applied? Or Observable.combineLatest with a filtered, mapped time
-        let p = acquisitionParameters acquisition
-        adcCountBy <| time (sampleInterval acquisition) p.DownsamplingRatio
-                   <| input
-                   <| acquisition
-
-    /// Returns an observable which emits a tuple of sample index and voltage for every sample observed on
-    /// the specified input in an acquisition.
-    let voltageByIndex = voltageBy id
-
-    /// Returns an observable which emits a tuple of timestamp and voltage for every sample observed on the
-    /// specified input in an acquisition.
-    let voltageByTime input acquisition =
-        let p = acquisitionParameters acquisition
-        voltageBy
-        <| time (sampleInterval acquisition) p.DownsamplingRatio
-        <| input
-        <| acquisition
-        
-    /// Returns an observable which emits a tuple of sample index and voltage for every sample observed on
-    /// the specified input in an acquisition.
-    let digitalByteByIndex = digitalByteBy id
-
-    /// Returns an observable which emits a tuple of timestamp and voltage for every sample observed on the
-    /// specified input in an acquisition.
-    let digitalByteByTime input acquisition =
-        let p = acquisitionParameters acquisition
-        digitalByteBy
-        <| time (sampleInterval acquisition) p.DownsamplingRatio
-        <| input
-        <| acquisition
-
-    /// Returns an observable which emits a tuple of sample index and voltage for every sample observed on
-    /// the specified input in an acquisition.
-    let digitalBitByIndex bit = digitalBitBy bit id
-
-    /// Returns an observable which emits a tuple of timestamp and voltage for every sample observed on the
-    /// specified input in an acquisition.
-    let digitalBitByTime bit input acquisition =
-        let p = acquisitionParameters acquisition
-        digitalBitBy bit
-        <| time (sampleInterval acquisition) p.DownsamplingRatio
-        <| input
-        <| acquisition
-
     /// Helper function for constructing observables based on the ADC count samples for a given array of
     /// inputs.
     let private adcCountsEvent inputs acquisition =
         samplesObserved acquisition
         |> Observable.flatmapSeq (takeInputs inputs)
 
-    /// Returns an observable which emits an array of ADC counts for every sample observed on the specified
-    /// array of inputs in an acquisition.
-    let adcCounts inputs acquisition =
-        adcCountsEvent inputs acquisition
-        |> takeUntilFinished acquisition
-
-    /// Returns an observable which emits an array of voltages for every sample observed on the specified
-    /// array of inputs in an acquisition.
-    let voltages inputs acquisition =
-        adcCountsEvent inputs acquisition
-        |> Observable.map (adcCountsToVoltages inputs (acquisitionParameters acquisition))
-        |> takeUntilFinished acquisition
-
-    /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
-    /// function and array of ADC counts for every sample observed on the specified array of inputs
-    /// in an acquisition.
-    let adcCountsBy indexMapping inputs acquisition =
-        adcCountsEvent inputs acquisition
-        |> Observable.mapi (fun i samples -> (indexMapping i, samples))
-        |> takeUntilFinished acquisition
-
-    /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
-    /// function and array of voltages for every sample observed on the specified array of inputs in an
-    /// acquisition.
-    let voltagesBy indexMapping inputs acquisition =
-        adcCountsEvent inputs acquisition
-        |> Observable.mapi (fun i adcCounts -> (indexMapping i, adcCountsToVoltages inputs (acquisitionParameters acquisition) adcCounts))
-        |> takeUntilFinished acquisition
-
-    /// Returns an observable which emits a tuple of sample index and array of ADC counts for every sample
-    /// observed on the specified array of inputs in an acquisition.
-    let adcCountsByIndex = adcCountsBy id
-
-    /// Returns an observable which emits a tuple of timestamp and array of ADC counts for every sample
-    /// observed on the specified array of inputs in an acquisition.
-    let adcCountsByTime inputs acquisition =
-        let p = acquisitionParameters acquisition
-        adcCountsBy
-        <| time (sampleInterval acquisition) p.DownsamplingRatio
-        <| inputs
-        <| acquisition
-
-    /// Returns an observable which emits a tuple of sample index and array of voltages for every sample
-    /// observed on the specified array of inputs in an acquisition.
-    let voltagesByIndex = voltagesBy id
-
-    /// Returns an observable which emits a tuple of timestamp and array of voltages for every sample
-    /// observed on the specified array of inputs in an acquisition.
-    let voltagesByTime inputs acquisition =
-        let p = acquisitionParameters acquisition
-        voltagesBy
-        <| time (sampleInterval acquisition) p.DownsamplingRatio
-        <| inputs
-        <| acquisition
-
-    /// Returns an observable which emits a tuple of ADC counts for each pair of samples observed on the
-    /// specified inputs in an acquisition.
-    let adcCountXY xInput yInput acquisition =
-        adcCounts [| xInput ; yInput |] acquisition
-        |> takeXY 0 1
-
-    /// Returns an observable which emits a tuple of voltages for each pair of samples observed on the
-    /// specified inputs in an acquisition.
-    let voltageXY xInput yInput acquisition =
-        voltages [| xInput ; yInput |] acquisition
-        |> takeXY 0 1
-
-    /// Helper function for constructing observables based on sample blocks for a given input in an
-    /// acquisition.
-    let private adcCountByBlockEvent input acquisition =
+    /// Count the number of samples observed so far in the acquisition.
+    let blockSampleCount input acquisition =
         samplesObserved acquisition
-        |> Event.map (fun samples -> samples.Samples |> Map.find input)
+        |> Event.map (fun block -> block.Length)
 
-    /// Returns an observable which emits an array of ADC counts for each block of samples observed on the
-    /// specified input in an acquisition.
-    let adcCountByBlock input acquisition =
-        adcCountByBlockEvent input acquisition
-        |> takeUntilFinished acquisition
+    /// Tools for dealing with data points as singletons, more associated with the streaming model of data acquisition.
+    module Single =
+        /// Returns the n-th signal from an observable which emits an array of signals at each observation.
+        let nth n = Observable.map (fun samples -> Array.get samples n)
 
-    /// Returns an observable which emits an array of voltages for each block of samples observed on the
-    /// specified input in an acquisition.
-    let voltageByBlock input acquisition =
-        adcCountByBlockEvent input acquisition
-        |> Event.map (Array.map (adcCountToVoltage input (acquisitionParameters acquisition)))
-        |> takeUntilFinished acquisition
+        /// Takes the n-th and m-th signals from an observable which emits an array of signals at each
+        /// observation and combines them into a tuple.
+        let takeXY n m = Observable.map (fun samples -> (Array.get samples n, Array.get samples m))
 
-    /// Helper function for constructing observables based on the sample blocks for a given array of inputs
-    /// in an acquisition.
-    let private adcCountsByBlockEvent inputs acquisition =
-        samplesObserved acquisition
-        |> Event.map (fun samples -> samples.Samples |> Map.findArray inputs )
+        /// Takes the n-th and m-th signals from an observable which emits an array of indexed or timestamped
+        /// signals at each observation and combines the values into a tuple, discarding the indecies.
+        let takeXYFromIndexed n m = Observable.map (fun (_, samples) -> (Array.get samples n, Array.get samples m))
 
-    /// Returns an observable which emits an array of ADC count blocks for each sample block observed for
-    /// the given array of inputs in an acquisition.
-    let adcCountsByBlock inputs acquisition =
-        adcCountsByBlockEvent inputs acquisition
-        |> takeUntilFinished acquisition
+        /// Returns an observable which emits the ADC count for every sample observed on the specified input
+        /// in an acquisition.
+        let adcCount input acquisition =
+            adcCountEvent input acquisition
+            |> takeUntilFinished acquisition
 
-    /// Returns an observable which emits an array of voltage blocks for each sample block observed for the
-    /// given array of inputs in an acquisition.
-    let voltagesByBlock inputs acquisition = 
-        adcCountsByBlockEvent inputs acquisition
-        |> Event.map (Array.mapi (fun i -> Array.map (adcCountToVoltage inputs.[i] (acquisitionParameters acquisition))))
-        |> takeUntilFinished acquisition
+        /// Returns an observable which emits the voltage for every sample observed on the specified input in
+        /// an acquisition.
+        let voltage input acquisition =
+            adcCountEvent input acquisition
+            |> Observable.map (adcCountToVoltage input (acquisitionParameters acquisition))
+            |> takeUntilFinished acquisition
 
-    /// Helper function for constructing observables which buffer a specified number of the latest samples
-    /// on a given input in acquisition.
-    let private adcCountBufferedEvent count input acquisition =
-        samplesObserved acquisition
-        |> Observable.flatmapSeq (fun samples -> samples.Samples |> Map.find input |> Array.toSeq)
-        |> Observable.ringBuffer count
+        /// Returns an observable which emits the byte representation of every sample observed on a digital port
+        let digitalByte input acquisition =
+            adcCountEvent input acquisition
+            |> Observable.map rawToByte
+            |> takeUntilFinished acquisition
 
-    /// Returns an observable which emits the latest specified number of ADC counts sampled on a given
-    /// input after each sample block in an acquisition.
-    let adcCountBuffered count input acquisition =
-        adcCountBufferedEvent count input acquisition
-        |> takeUntilFinished acquisition
+        /// Returns an observable which emits the state of a single bit for every sample observed on a digital port
+        let digitalBit bit input acquisition =
+            adcCountEvent input acquisition
+            |> Observable.map (rawToBit bit)
+            |> takeUntilFinished acquisition
 
-    /// Returns an observable which emits the latest specified number of voltages sampled on a given input
-    /// after each sample block in an acquisition.
-    let voltageBuffered windowSize input acquisition =
-        adcCountBufferedEvent windowSize input acquisition
-        |> Observable.map (Seq.map (adcCountToVoltage input (acquisitionParameters acquisition)))
-        |> takeUntilFinished acquisition
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and ADC count for every sample observed on the specified input in an acquisition.
+        let adcCountBy indexMapping input acquisition =
+            adcCountEvent input acquisition
+            |> Observable.mapi (fun i adcCount -> (indexMapping i, adcCount))
+            |> takeUntilFinished acquisition
 
-    /// Helper function for constructing observables which buffer a specified number of the latest samples
-    /// on a given array of inputs in an acquisition.
-    let private adcCountsBufferedEvent count inputs acquisition =
-        samplesObserved acquisition
-        |> Observable.flatmapSeq (takeInputs inputs)
-        |> Observable.ringBuffer count
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and voltage for every sample observed on the specified input in an acquisition.
+        let voltageBy indexMapping input acquisition =
+            adcCountEvent input acquisition
+            |> Observable.mapi (fun i adcCount -> (indexMapping i, adcCountToVoltage input (acquisitionParameters acquisition) adcCount))
+            |> takeUntilFinished acquisition
 
-    /// Returns an observable which emits an array of the latest specified number of ADC counts sampled on
-    /// a given array of inputs after each sample block in an acquisition.
-    let adcCountsBuffered count inputs acquisition =
-        adcCountBufferedEvent count inputs acquisition
-        |> takeUntilFinished acquisition
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and voltage for every sample observed on the specified input in an acquisition.
+        let digitalByteBy indexMapping input acquisition =
+            adcCountEvent input acquisition
+            |> Observable.mapi (fun i raw -> (indexMapping i, rawToByte raw))
+            |> takeUntilFinished acquisition
 
-    /// Returns an observable which emits an array of the latest specified number of voltages sampled on a
-    /// given array of inputs after each sample block in an acquisition.
-    let voltagesBuffered count inputs acquisition =
-        adcCountsBufferedEvent count inputs acquisition
-        |> Observable.map (Seq.map (fun adcCounts -> adcCountsToVoltages inputs (acquisitionParameters acquisition) adcCounts))
-        |> takeUntilFinished acquisition
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and voltage for every sample observed on the specified input in an acquisition.
+        let digitalBitBy bit indexMapping input acquisition =
+            adcCountEvent input acquisition
+            |> Observable.mapi (fun i raw -> (indexMapping i, (rawToBit bit) raw))
+            |> takeUntilFinished acquisition
+
+        /// Returns an observable which emits a tuple of sample index and ADC count for every sample observed
+        /// on the specified input in an acquisition.
+        let adcCountByIndex = adcCountBy id
+
+        /// Returns an observable which emits a tuple of timestamp and ADC count for every sample observed on
+        /// the specified input in an acquisition.
+        let adcCountByTime input (acquisition:Acquisition) =
+            // Use Observable.defer to wait on status to get the Acquisition interval
+            // then return the adcCounts with the time applied? Or Observable.combineLatest with a filtered, mapped time
+            let p = acquisitionParameters acquisition
+            adcCountBy <| time (sampleInterval acquisition) p.DownsamplingRatio
+                       <| input
+                       <| acquisition
+
+        /// Returns an observable which emits a tuple of sample index and voltage for every sample observed on
+        /// the specified input in an acquisition.
+        let voltageByIndex = voltageBy id
+
+        /// Returns an observable which emits a tuple of timestamp and voltage for every sample observed on the
+        /// specified input in an acquisition.
+        let voltageByTime input acquisition =
+            let p = acquisitionParameters acquisition
+            voltageBy
+            <| time (sampleInterval acquisition) p.DownsamplingRatio
+            <| input
+            <| acquisition
+            
+        /// Returns an observable which emits a tuple of sample index and voltage for every sample observed on
+        /// the specified input in an acquisition.
+        let digitalByteByIndex = digitalByteBy id
+
+        /// Returns an observable which emits a tuple of timestamp and voltage for every sample observed on the
+        /// specified input in an acquisition.
+        let digitalByteByTime input acquisition =
+            let p = acquisitionParameters acquisition
+            digitalByteBy
+            <| time (sampleInterval acquisition) p.DownsamplingRatio
+            <| input
+            <| acquisition
+
+        /// Returns an observable which emits a tuple of sample index and voltage for every sample observed on
+        /// the specified input in an acquisition.
+        let digitalBitByIndex bit = digitalBitBy bit id
+
+        /// Returns an observable which emits a tuple of timestamp and voltage for every sample observed on the
+        /// specified input in an acquisition.
+        let digitalBitByTime bit input acquisition =
+            let p = acquisitionParameters acquisition
+            digitalBitBy bit
+            <| time (sampleInterval acquisition) p.DownsamplingRatio
+            <| input
+            <| acquisition
+
+        /// Accumulates a signal, emitting the sequence of samples observed so far at each observation.
+        let accumulate signal = Observable.scanInit List.empty List.cons signal |> Observable.map Seq.ofList
+
+        /// Returns an observable which emits an array of ADC counts for every sample observed on the specified
+        /// array of inputs in an acquisition.
+        let adcCounts inputs acquisition =
+            adcCountsEvent inputs acquisition
+            |> takeUntilFinished acquisition
+
+        /// Returns an observable which emits an array of voltages for every sample observed on the specified
+        /// array of inputs in an acquisition.
+        let voltages inputs acquisition =
+            adcCountsEvent inputs acquisition
+            |> Observable.map (adcCountsToVoltages inputs (acquisitionParameters acquisition))
+            |> takeUntilFinished acquisition
+
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and array of ADC counts for every sample observed on the specified array of inputs
+        /// in an acquisition.
+        let adcCountsBy indexMapping inputs acquisition =
+            adcCountsEvent inputs acquisition
+            |> Observable.mapi (fun i samples -> (indexMapping i, samples))
+            |> takeUntilFinished acquisition
+
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and array of voltages for every sample observed on the specified array of inputs in an
+        /// acquisition.
+        let voltagesBy indexMapping inputs acquisition =
+            adcCountsEvent inputs acquisition
+            |> Observable.mapi (fun i adcCounts -> (indexMapping i, adcCountsToVoltages inputs (acquisitionParameters acquisition) adcCounts))
+            |> takeUntilFinished acquisition
+
+        /// Returns an observable which emits a tuple of sample index and array of ADC counts for every sample
+        /// observed on the specified array of inputs in an acquisition.
+        let adcCountsByIndex = adcCountsBy id
+
+        /// Returns an observable which emits a tuple of timestamp and array of ADC counts for every sample
+        /// observed on the specified array of inputs in an acquisition.
+        let adcCountsByTime inputs acquisition =
+            let p = acquisitionParameters acquisition
+            adcCountsBy
+            <| time (sampleInterval acquisition) p.DownsamplingRatio
+            <| inputs
+            <| acquisition
+
+        /// Returns an observable which emits a tuple of sample index and array of voltages for every sample
+        /// observed on the specified array of inputs in an acquisition.
+        let voltagesByIndex = voltagesBy id
+
+        /// Returns an observable which emits a tuple of timestamp and array of voltages for every sample
+        /// observed on the specified array of inputs in an acquisition.
+        let voltagesByTime inputs acquisition =
+            let p = acquisitionParameters acquisition
+            voltagesBy
+            <| time (sampleInterval acquisition) p.DownsamplingRatio
+            <| inputs
+            <| acquisition
+
+        /// Returns an observable which emits a tuple of ADC counts for each pair of samples observed on the
+        /// specified inputs in an acquisition.
+        let adcCountXY xInput yInput acquisition =
+            adcCounts [| xInput ; yInput |] acquisition
+            |> takeXY 0 1
+
+        /// Returns an observable which emits a tuple of voltages for each pair of samples observed on the
+        /// specified inputs in an acquisition.
+        let voltageXY xInput yInput acquisition =
+            voltages [| xInput ; yInput |] acquisition
+            |> takeXY 0 1
+
+    /// Tools for dealing with signal data as complete acquisition blocks, similar to block acquisition modes.  For
+    /// streaming data buffered into blocks of user-defined size, use Signal.Buffer instead.
+    module Block =
+        /// Helper function for constructing observables based on sample blocks for a given input in an
+        /// acquisition.
+        let private adcCountByEvent input acquisition =
+            samplesObserved acquisition
+            |> Event.map (fun samples -> samples.Samples |> Map.find input)
+
+        /// Helper function for constructing observables based on the sample blocks for a given array of inputs
+        /// in an acquisition.
+        let private adcCountsByEvent inputs acquisition =
+            samplesObserved acquisition
+            |> Event.map (fun samples -> samples.Samples |> Map.findArray inputs )
+
+        /// Returns an observable which emits an array of ADC counts for each block of samples observed on the
+        /// specified input in an acquisition.
+        let adcCount input acquisition =
+            adcCountByEvent input acquisition
+            |> takeUntilFinished acquisition
+
+        /// Returns an observable which emits an array of voltages for each block of samples observed on the
+        /// specified input in an acquisition.
+        let voltage input acquisition =
+            adcCountByEvent input acquisition
+            |> Event.map (Array.map (adcCountToVoltage input (acquisitionParameters acquisition)))
+            |> takeUntilFinished acquisition
+
+        /// Returns an observable which emits an array of ADC count blocks for each sample block observed for
+        /// the given array of inputs in an acquisition.
+        let adcCounts inputs acquisition =
+            adcCountsByEvent inputs acquisition
+            |> takeUntilFinished acquisition
+
+        /// Returns an observable which emits an array of voltage blocks for each sample block observed for the
+        /// given array of inputs in an acquisition.
+        let voltages inputs acquisition = 
+            adcCountsByEvent inputs acquisition
+            |> Event.map (Array.mapi (fun i -> Array.map (adcCountToVoltage inputs.[i] (acquisitionParameters acquisition))))
+            |> takeUntilFinished acquisition
+
+    /// Tools for working with signals buffered into blocks of user-defined size, rather than an "acquisition block" obtained
+    /// from using the PicoScope's block mode (for this, use Signal.Block instead).
+    module Buffer =
+        /// Helper function for constructing observables which buffer a specified number of the latest samples
+        /// on a given input in acquisition.
+        let private adcCountEvent count input acquisition =
+            samplesObserved acquisition
+            |> Observable.flatmapSeq (fun samples -> samples.Samples |> Map.find input |> Array.toSeq)
+            |> Observable.ringBuffer count
+
+        /// Returns an observable which emits the latest specified number of ADC counts sampled on a given
+        /// input after each sample block in an acquisition.
+        let adcCount count input acquisition =
+            adcCountEvent count input acquisition
+            |> takeUntilFinished acquisition
+
+        /// Returns an observable which emits the latest specified number of voltages sampled on a given input
+        /// after each sample block in an acquisition.
+        let voltage windowSize input acquisition =
+            adcCountEvent windowSize input acquisition
+            |> Observable.map (Seq.map (adcCountToVoltage input (acquisitionParameters acquisition)))
+            |> takeUntilFinished acquisition
+
+        /// Helper function for constructing observables which buffer a specified number of the latest samples
+        /// on a given array of inputs in an acquisition.
+        let private adcCountsEvent count inputs acquisition =
+            samplesObserved acquisition
+            |> Observable.flatmapSeq (takeInputs inputs)
+            |> Observable.ringBuffer count
+
+        /// Returns an observable which emits an array of the latest specified number of ADC counts sampled on a
+        /// given array of inputs after each sample block in an acquisition.
+        let adcCounts count inputs acquisition =
+            adcCountsEvent count inputs acquisition
+            |> takeUntilFinished acquisition
+
+        /// Returns an observable which emits an array of the latest specified number of voltages sampled on a
+        /// given array of inputs after each sample block in an acquisition.
+        let voltages count inputs acquisition =
+            adcCountsEvent count inputs acquisition
+            |> Observable.map (Seq.map (fun adcCounts -> adcCountsToVoltages inputs (acquisitionParameters acquisition) adcCounts))
+            |> takeUntilFinished acquisition
 
     /// Returns an observable which emits a set of channels on which voltage overflow occurred if voltage 
     /// overflow occurs on any input channel in an acquisition. 

@@ -103,7 +103,7 @@ let showTimeChart inputs acquisition max = async {
     do! Async.SwitchToContext uiContext // add the chart to the form using the UI thread context
 
     let chart =
-        Signal.voltageByTime inputs acquisition
+        Signal.Single.voltageByTime inputs acquisition
         |> Observable.sample (TimeSpan.FromMilliseconds 10.0)
         |> Observable.observeOnContext uiContext
         |> LiveChart.LineIncremental
@@ -122,12 +122,12 @@ let showDualAggregateChart inputA inputB acquisition = async {
 
     let chart =
         Chart.Combine [
-            Signal.voltageByTime inputA acquisition
+            Signal.Single.voltageByTime inputA acquisition
             |> Observable.sample (TimeSpan.FromMilliseconds 20.0)
             |> Observable.observeOnContext uiContext
             |> LiveChart.FastLineIncremental
 
-            Signal.voltageByTime inputB acquisition
+            Signal.Single.voltageByTime inputB acquisition
             |> Observable.sample (TimeSpan.FromMilliseconds 20.0)
             |> Observable.observeOnContext uiContext
             |> LiveChart.FastLineIncremental ]
@@ -143,7 +143,7 @@ let showDigitalTimeChart input acquisition = async {
 
     let chart =
 //        Streaming.Signal.digitalByteByTime input acquisition
-        Signal.digitalBitByTime 2 input acquisition
+        Signal.Single.digitalBitByTime 2 input acquisition
 //        |> Observable.sample (TimeSpan.FromMilliseconds 1.0)
         |> Observable.observeOnContext uiContext
         |> LiveChart.LineIncremental
@@ -161,7 +161,7 @@ let showChartXY inputA inputB acquisition = async {
     do! Async.SwitchToContext uiContext // add the chart to the form using the UI thread context
 
     let chartXY =
-        Signal.voltageXY inputA inputB acquisition
+        Signal.Single.voltageXY inputA inputB acquisition
         |> Observable.sample (TimeSpan.FromMilliseconds 20.0)
         |> Observable.observeOnContext uiContext
         |> LiveChart.FastLineIncremental
@@ -179,11 +179,11 @@ let printStatusUpdates acquisition =
     |> Observable.add (printfn "%A") // print stream status updates (preparing, streaming, finished...) 
 
 let printSamples inputs acquisition =
-    Signal.voltageByTime inputs acquisition
+    Signal.Single.voltageByTime inputs acquisition
     |> Observable.add (printfn "Sample: %A")
 
 let printAdc inputs acquisition =
-    Signal.adcCount inputs acquisition
+    Signal.Single.adcCount inputs acquisition
     |> Observable.add (printfn "Sample Adc: %A")
 
 let printBlockCount inputs acquisition =
@@ -191,22 +191,22 @@ let printBlockCount inputs acquisition =
     |> Observable.add (printfn "Block count: %A")
 
 let printSampledInput inputs acquisition =
-    Signal.voltageByTime inputs acquisition
+    Signal.Single.voltageByTime inputs acquisition
     |> Observable.sample (TimeSpan.FromMilliseconds 50.0)
     |> Observable.add (printfn "Sample: %A")
 
 let printDigitalSamples input acquisition =
-    Signal.digitalByteByTime input acquisition
+    Signal.Single.digitalByteByTime input acquisition
 //    |> Observable.sample (TimeSpan.FromMilliseconds 50.0)
     |> Observable.add (printfn "Sample: %A")
 
 let printDigitalTags bit input acquisition =
-    Signal.digitalBitByTime bit input acquisition
+    Signal.Single.digitalBitByTime bit input acquisition
     |> Signal.digitalEdge Signal.RisingEdge
     |> Observable.add (printfn "Edge: %A")
 
 let printPulseRate bit inputs acquisition =
-    Signal.digitalBitByTime bit inputs acquisition
+    Signal.Single.digitalBitByTime bit inputs acquisition
     |> Signal.digitalEdge Signal.RisingEdge
     |> Observable.bufferSpan (TimeSpan.FromSeconds 0.5)
     |> Observable.add (fun x -> (printfn "Pulse rate: %d /s" (x.Count * 2)))
@@ -214,27 +214,27 @@ let printPulseRate bit inputs acquisition =
 let printPulseTotalCount bit input acquisition =
     let timer = System.Diagnostics.Stopwatch()
     timer.Start()
-    Signal.digitalBitByTime bit input acquisition
+    Signal.Single.digitalBitByTime bit input acquisition
     |> Signal.digitalEdge Signal.RisingEdge
     |> Observable.count
     |> Observable.add (fun x -> let t = timer.ElapsedMilliseconds;
                                 printfn "Received %d pulses in %.1f s. Approx rate: %d ks/s" x (float t*0.001) (x/int t))
 
 let printRate inputs acquisition =
-    Signal.adcCountByTime inputs acquisition
+    Signal.Single.adcCountByTime inputs acquisition
     |> Observable.bufferSpan (TimeSpan.FromSeconds 0.5)
     |> Observable.add (fun x -> (printfn "Rate: %.1f ks/s" (float x.Count * 0.002)))
 
 let printTotalCount inputs acquisition =
     let timer = System.Diagnostics.Stopwatch()
     timer.Start()
-    Signal.adcCountByTime inputs acquisition
+    Signal.Single.adcCountByTime inputs acquisition
     |> Observable.count
     |> Observable.add (fun x -> let t = timer.ElapsedMilliseconds;
                                 printfn "Received %d samples in %.1f s. Approx rate: %d ks/s" x (float t*0.001) (x/int t))
 
 let printWhenFinished inputs acquisition =
-    Signal.adcCount inputs acquisition
+    Signal.Single.adcCount inputs acquisition
     |> Observable.last
     |> Observable.add (fun x -> printfn "That's all the samples folks")
 
