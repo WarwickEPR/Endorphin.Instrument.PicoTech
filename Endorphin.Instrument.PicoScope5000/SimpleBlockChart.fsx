@@ -30,9 +30,8 @@ let blockParametersNoDownsampling =
     |> Parameters.Block.blockCapture
 
 let displayTimeChart inputs acquisition =
-        Signal.Single.voltageByTime inputs acquisition
+        Signal.Block.voltageByTime inputs acquisition
         |> Observable.observeOnContext uiContext
-        |> Observable.toList
         |> Observable.add (fun list ->
             let chart = list |> Chart.Line
             new ChartTypes.ChartControl(chart, Dock = DockStyle.Fill) |> form.Controls.Add)
@@ -40,7 +39,7 @@ let displayTimeChart inputs acquisition =
 let showTimeChart inputs acquisition = async {
     do! Async.SwitchToContext uiContext // add the chart to the form using the UI thread context
 
-    let data = Signal.Single.voltageByTime inputs acquisition
+    let data = Signal.Block.voltageByTime inputs acquisition
 
 //    let chart =
 //

@@ -36,9 +36,9 @@ let showTimeChart inputs acquisition = async {
     do! Async.SwitchToContext uiContext // add the chart to the form using the UI thread context
 
     let chart =
-        Signal.Single.voltageByTime inputs acquisition
+        Signal.Block.voltageByTime inputs acquisition
         |> Observable.observeOnContext uiContext
-        |> LiveChart.LineIncremental
+        |> LiveChart.FastLine
         |> Chart.WithXAxis(Title = "Time")
         |> Chart.WithYAxis(Title = "Voltage")
 
