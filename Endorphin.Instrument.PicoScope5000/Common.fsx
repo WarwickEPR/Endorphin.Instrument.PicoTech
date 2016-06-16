@@ -84,3 +84,5 @@ module Common =
         Signal.adcCount inputs acquisition
         |> Observable.last
         |> Observable.add (fun x -> printfn "Reached the end of the sample stream")
+
+    let noWork = async { return () }

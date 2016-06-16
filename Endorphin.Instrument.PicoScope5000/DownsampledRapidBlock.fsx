@@ -42,7 +42,7 @@ let cts = new CancellationTokenSource()
 let experiment picoScope = async {
     // create an acquisition with the previously defined parameters and start it after subscribing to its events
     let! acquisition = noDownsampling picoScope
-    let acquisitionHandle = Acquisition.startWithCancellationToken acquisition cts.Token
+    let acquisitionHandle = Acquisition.startWithCancellationToken acquisition noWork cts.Token
 
     // wait for the acquisition to finish automatically or by cancellation
     let! result = Acquisition.waitToFinish acquisitionHandle

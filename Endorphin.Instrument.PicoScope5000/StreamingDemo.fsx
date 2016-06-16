@@ -1,11 +1,12 @@
 // Copyright (c) University of Warwick. All Rights Reserved. Licensed under the Apache License, Version 2.0. See LICENSE.txt in the project root for license information.
 
 #r "../Endorphin.Core/bin/Debug/Endorphin.Core.dll"
+#r "../Endorphin.Utilities.TimeInterval/bin/Debug/Endorphin.Utilities.TimeInterval.dll"
 #r "../packages/Rx-Core.2.2.5/lib/net45/System.Reactive.Core.dll"
 #r "../packages/Rx-Interfaces.2.2.5/lib/net45/System.Reactive.Interfaces.dll"
 #r "../packages/Rx-Linq.2.2.5/lib/net45/System.Reactive.Linq.dll"
 #r "../packages/FSharp.Control.Reactive.3.2.0/lib/net40/FSharp.Control.Reactive.dll"
-#r "../packages/FSharp.Charting.0.90.12/lib/net40/FSharp.Charting.dll"
+#r "../packages/FSharp.Charting.0.90.13/lib/net40/FSharp.Charting.dll"
 #r "bin/Release/Endorphin.Instrument.PicoScope5000.dll"
 #r "System.Windows.Forms.DataVisualization.dll"
 
@@ -20,6 +21,7 @@ open FSharp.Control.Reactive
 
 open Endorphin.Core
 open Endorphin.Instrument.PicoScope5000
+open Endorphin.Utilities.TimeInterval
 
 let form = new Form(Visible = true, TopMost = true, Width = 800, Height = 600)
 let ui = SynchronizationContext.Current
@@ -33,7 +35,7 @@ form.Closed |> Observable.add (fun _ -> cts.Cancel() ; writer.Dispose())
 
 let streamingParameters = 
     // define the streaming parameters: 14 bit resolution, 20 ms sample interval, 64 kSample bufffer
-    Parameters.Acquisition.create (Interval.fromMilliseconds 20<ms>) Resolution_14bit (64 * 1024)
+    Parameters.Acquisition.create (TimeInterval.fromMilliseconds 20<ms>) Resolution_14bit (64 * 1024)
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_2V   0.0f<V> FullBandwidth
     |> Parameters.Acquisition.enableChannel ChannelB DC Range_500mV 0.0f<V> Bandwidth_20MHz
     |> Parameters.Acquisition.sampleChannels [ ChannelA ; ChannelB ] NoDownsampling
@@ -105,7 +107,8 @@ let experiment picoScope = async {
     printCumulativeSampleCount acquisition
     writeToCsv acquisition
 
-    let acquisitionHandle = Acquisition.startWithCancellationToken acquisition cts.Token
+    let noWork = async { return () }
+    let acquisitionHandle = Acquisition.startWithCancellationToken acquisition noWork cts.Token
     
     // wait for the acquisition to finish automatically or by cancellation   
     let! result = Acquisition.waitToFinish acquisitionHandle

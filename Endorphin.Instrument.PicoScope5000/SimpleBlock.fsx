@@ -5,11 +5,12 @@ open System
 open System.Threading
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Endorphin.Instrument.PicoScope5000
+open Endorphin.Utilities.TimeInterval
 
 //log4net.Config.BasicConfigurator.Configure()
 
 let blockParametersNoDownsampling =
-    Parameters.Acquisition.create (Interval.fromNanoseconds 2<ns>) Resolution_12bit (1<<<10)
+    Parameters.Acquisition.create (fromNanoseconds 2<ns>) Resolution_12bit (1<<<10)
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_50mV 0.0f<V> FullBandwidth
     |> Parameters.Acquisition.sampleChannel ChannelA NoDownsampling
     |> Parameters.Acquisition.withTrigger (Trigger.auto 50s<ms>)
@@ -34,7 +35,7 @@ let cts = new CancellationTokenSource()
 let experiment picoScope = async {
     // create an acquisition with the previously defined parameters and start it after subscribing to its events
     let! acquisition = noDownsampling picoScope
-    let acquisitionHandle = Acquisition.startWithCancellationToken acquisition cts.Token
+    let acquisitionHandle = Acquisition.startWithCancellationToken acquisition noWork cts.Token
 
     // wait for the acquisition to finish automatically or by cancellation
     let! result = Acquisition.waitToFinish acquisitionHandle

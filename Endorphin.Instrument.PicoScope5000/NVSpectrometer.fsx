@@ -1,6 +1,7 @@
 ﻿// Copyright (c) University of Warwick. All Rights Reserved. Licensed under the Apache License, Version 2.0. See LICENSE.txt in the project root for license information.
 
 #r "../Endorphin.Core/bin/Release/Endorphin.Core.dll"
+#r "../Endorphin.Utilities.TimeInterval/bin/Debug/Endorphin.Utilities.TimeInterval.dll"
 #r "../packages/Rx-Core.2.2.5/lib/net45/System.Reactive.Core.dll"
 #r "../packages/Rx-Interfaces.2.2.5/lib/net45/System.Reactive.Interfaces.dll"
 #r "../packages/Rx-Linq.2.2.5/lib/net45/System.Reactive.Linq.dll"
@@ -20,6 +21,7 @@ open FSharp.Control.Reactive
 
 open Endorphin.Core
 open Endorphin.Instrument.PicoScope5000
+open Endorphin.Utilities.TimeInterval
 
 let form = new Form(Visible = true, TopMost = true, Width = 800, Height = 600)
 let ui = SynchronizationContext.Current
@@ -27,7 +29,7 @@ let cts = new CancellationTokenSource()
 
 let streamingParameters =
     // define the streaming parameters: 14 bit resolution, 20 ms sample interval, 64 kSample bufffer
-    Parameters.Acquisition.create (Interval.fromMicroseconds 10<us>) Resolution_14bit (64 * 1024)
+    Parameters.Acquisition.create (TimeInterval.fromMicroseconds 10<us>) Resolution_14bit (64 * 1024)
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_2V -2.5f<V> FullBandwidth
     |> Parameters.Acquisition.sampleChannels [ ChannelA ] NoDownsampling
     |> Parameters.Streaming.create
@@ -68,7 +70,10 @@ let experiment picoScope = async {
     let acquisition = Acquisition.prepare picoScope streamingParameters
     do! showTimeChart acquisition
 
-    let acquisitionHandle = Acquisition.startWithCancellationToken acquisition cts.Token
+    // A workflow that does no work when triggered.
+    let noWork = async { return () }
+
+    let acquisitionHandle = Acquisition.startWithCancellationToken acquisition noWork cts.Token
 
     do! Async.Sleep 1000
     do! PicoScope.SignalGenerator.invokeSoftwareTrigger picoScope
