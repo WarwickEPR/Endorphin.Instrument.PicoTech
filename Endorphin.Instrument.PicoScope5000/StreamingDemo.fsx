@@ -7,7 +7,7 @@
 #r "../packages/Rx-Linq.2.2.5/lib/net45/System.Reactive.Linq.dll"
 #r "../packages/FSharp.Control.Reactive.3.2.0/lib/net40/FSharp.Control.Reactive.dll"
 #r "../packages/FSharp.Charting.0.90.13/lib/net40/FSharp.Charting.dll"
-#r "bin/Release/Endorphin.Instrument.PicoScope5000.dll"
+#r "bin/debug/Endorphin.Instrument.PicoScope5000.dll"
 #r "System.Windows.Forms.DataVisualization.dll"
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
@@ -47,11 +47,11 @@ let showTimeChart acquisition = async {
         
     let chart = 
         Chart.Combine [ 
-            Signal.voltageByTime (ChannelA, NoDownsamplingBuffer) acquisition
+            Signal.Single.voltageByTime (ChannelA, NoDownsamplingBuffer) acquisition
             |> Observable.observeOnContext ui
             |> LiveChart.FastLineIncremental
 
-            Signal.voltageByTime (ChannelB, NoDownsamplingBuffer) acquisition
+            Signal.Single.voltageByTime (ChannelB, NoDownsamplingBuffer) acquisition
             |> Observable.observeOnContext ui
             |> LiveChart.FastLineIncremental ]
         |> Chart.WithXAxis(Title = "Time")
@@ -69,7 +69,7 @@ let showChartXY acquisition = async {
     do! Async.SwitchToContext ui // add the chart to the form using the UI sync context
 
     let chartXY =
-        Signal.voltageXY (ChannelA, NoDownsamplingBuffer) (ChannelB, NoDownsamplingBuffer) acquisition
+        Signal.Single.voltageXY (ChannelA, NoDownsamplingBuffer) (ChannelB, NoDownsamplingBuffer) acquisition
         |> Observable.observeOnContext ui
         |> LiveChart.FastLineIncremental
         |> Chart.WithXAxis(Title = "Channel A voltage")
@@ -85,7 +85,7 @@ let showChartXY acquisition = async {
     do! Async.SwitchToThreadPool() }
 
 let writeToCsv acquisition =
-    Signal.voltageByTime (ChannelA, NoDownsamplingBuffer) acquisition
+    Signal.Single.voltageByTime (ChannelA, NoDownsamplingBuffer) acquisition
     |> Observable.add (fun (time, voltage) -> sprintf "%.9f, %f" time voltage |> writer.WriteLine)
 
 let printStatusUpdates acquisition =
@@ -93,7 +93,7 @@ let printStatusUpdates acquisition =
     |> Observable.add (printfn "%A") // print stream status updates (preparing, streaming, finished...) 
 
 let printCumulativeSampleCount acquisition =
-    Signal.voltageByBlock (ChannelA, NoDownsamplingBuffer) acquisition
+    Signal.Block.voltage (ChannelA, NoDownsamplingBuffer) acquisition
     |> Observable.map Array.length
     |> Observable.scan (+)
     |> Observable.timestamp
