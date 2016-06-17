@@ -44,20 +44,21 @@ module Parameters =
         let enableChannels channels coupling range voltageOffset bandwidth (parameters : AcquisitionParameters) =
             { parameters with Inputs = parameters.Inputs |> Inputs.enableChannels channels coupling range voltageOffset bandwidth }
 
+        let private sampleInputChannel channel downsamplingMode (parameters : AcquisitionParameters) =
+            { parameters with Inputs = parameters.Inputs |> Inputs.sampleChannel channel downsamplingMode }
         /// Returns modified acquisition parameters with the specified input channel sampled with
         /// the given downsampling mode. Fails if the channel is not enabled. Also fails if the acquisition
         /// has inputs which are sampled with no downsampling while another downsampling mode is given or
         /// vice-versa.
-        let private sampleInputChannel channel downsamplingMode (parameters : AcquisitionParameters) =
-            { parameters with Inputs = parameters.Inputs |> Inputs.sampleChannel channel downsamplingMode }
         let sampleChannel channel downsamplingMode parameters =
             sampleInputChannel channel downsamplingMode parameters
+
+        let private sampleInputChannels channels downsamplingMode (parameters : AcquisitionParameters) =
+            { parameters with Inputs = parameters.Inputs |> Inputs.sampleChannels channels downsamplingMode }
         /// Returns modified streaming acquisition parameters with the specified list of input channels
         /// sampled with the given downsampling mode. Fails if the channel is not enabled. Also fails if the
         /// acquisition has inputs which are sampled with no downsampling while another downsampling mode is
         /// given or vice-versa.
-        let private sampleInputChannels channels downsamplingMode (parameters : AcquisitionParameters) =
-            { parameters with Inputs = parameters.Inputs |> Inputs.sampleChannels channels downsamplingMode }
         let sampleChannels channels downsamplingMode parameters =
             sampleInputChannels channels downsamplingMode parameters
 
