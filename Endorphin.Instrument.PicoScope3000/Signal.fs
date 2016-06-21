@@ -172,6 +172,30 @@ module Signal =
         /// specified input in an acquisition.
         let voltageByTime input acquisition = voltageBy (timeMap acquisition) input acquisition
 
+        /// Returns an observable which emits the byte representation of every sample observed on a digital port
+        let digitalByte = createObservable adcCountEvent rawToByte
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and voltage for every sample observed on the specified input in an acquisition.
+        let digitalByteBy (map : int -> 'a) = observableBy digitalByte map
+        /// Returns an observable which emits a tuple of sample index and voltage for every sample observed on
+        /// the specified input in an acquisition.
+        let digitalByteByIndex = digitalByteBy id
+        /// Returns an observable which emits a tuple of timestamp and voltage for every sample observed on the
+        /// specified input in an acquisition.
+        let digitalByteByTime input acquisition = digitalByteBy (timeMap acquisition) input acquisition
+
+        /// Returns an observable which emits the state of a single bit for every sample observed on a digital port
+        let digitalBit bit = createObservable adcCountEvent (rawToBit bit)
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and voltage for every sample observed on the specified input in an acquisition.
+        let digitalBitBy bit = observableBy (digitalBit bit)
+        /// Returns an observable which emits a tuple of sample index and voltage for every sample observed on
+        /// the specified input in an acquisition.
+        let digitalBitByIndex bit = digitalBitBy bit id
+        /// Returns an observable which emits a tuple of timestamp and voltage for every sample observed on the
+        /// specified input in an acquisition.
+        let digitalBitByTime bit input acquisition = digitalBitBy bit (timeMap acquisition) input acquisition
+
         /// Returns an observable which emits an array of ADC counts for every sample observed on the specified
         /// array of inputs in an acquisition.
         let adcCounts = createObservable adcCountsEvent id
@@ -271,6 +295,30 @@ module Signal =
         /// specified input in an acquisition.
         let voltageByTime input acquisition = voltageBy (timeMap acquisition) input acquisition
 
+        /// Returns an observable which emits the byte representation of every block observed on a digital port
+        let digitalByte = createObservable adcCountEvent rawToByte
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and voltage for every block observed on the specified input in an acquisition.
+        let digitalByteBy (map : int -> 'a) = observableBy digitalByte map
+        /// Returns an observable which emits a tuple of sample index and voltage for every block observed on
+        /// the specified input in an acquisition.
+        let digitalByteByIndex = digitalByteBy id
+        /// Returns an observable which emits a tuple of timestamp and voltage for every block observed on the
+        /// specified input in an acquisition.
+        let digitalByteByTime input acquisition = digitalByteBy (timeMap acquisition) input acquisition
+
+        /// Returns an observable which emits the state of a single bit for every block observed on a digital port
+        let digitalBit bit = createObservable adcCountEvent (rawToBit bit)
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and voltage for every block observed on the specified input in an acquisition.
+        let digitalBitBy bit = observableBy (digitalBit bit)
+        /// Returns an observable which emits a tuple of sample index and voltage for every block observed on
+        /// the specified input in an acquisition.
+        let digitalBitByIndex bit = digitalBitBy bit id
+        /// Returns an observable which emits a tuple of timestamp and voltage for every block observed on the
+        /// specified input in an acquisition.
+        let digitalBitByTime bit input acquisition = digitalBitBy bit (timeMap acquisition) input acquisition
+
         /// Returns an observable which emits an array of ADC counts for every block observed on the specified
         /// array of inputs in an acquisition.
         let adcCounts = createObservable adcCountsEvent id
@@ -355,6 +403,30 @@ module Signal =
         /// Returns an observable which emits a tuple of timestamp and voltage for every block observed on the
         /// specified input in an acquisition.
         let voltageByTime count input acquisition = voltageBy (timeMap acquisition) count input acquisition
+
+        /// Returns an observable which emits the byte representation of every block observed on a digital port
+        let digitalByte = createObservable adcCountEvent rawToByte
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and voltage for every block observed on the specified input in an acquisition.
+        let digitalByteBy (map : int -> 'a) = observableBy digitalByte map
+        /// Returns an observable which emits a tuple of sample index and voltage for every block observed on
+        /// the specified input in an acquisition.
+        let digitalByteByIndex = digitalByteBy id
+        /// Returns an observable which emits a tuple of timestamp and voltage for every block observed on the
+        /// specified input in an acquisition.
+        let digitalByteByTime count input acquisition = digitalByteBy (timeMap acquisition) count input acquisition
+
+        /// Returns an observable which emits the state of a single bit for every block observed on a digital port
+        let digitalBit bit = createObservable adcCountEvent (rawToBit bit)
+        /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
+        /// function and voltage for every block observed on the specified input in an acquisition.
+        let digitalBitBy bit = observableBy (digitalBit bit)
+        /// Returns an observable which emits a tuple of sample index and voltage for every block observed on
+        /// the specified input in an acquisition.
+        let digitalBitByIndex bit = digitalBitBy bit id
+        /// Returns an observable which emits a tuple of timestamp and voltage for every block observed on the
+        /// specified input in an acquisition.
+        let digitalBitByTime bit count input acquisition = digitalBitBy bit (timeMap acquisition) count input acquisition
 
         /// Returns an observable which emits an array of ADC counts for every block observed on the specified
         /// array of inputs in an acquisition.
