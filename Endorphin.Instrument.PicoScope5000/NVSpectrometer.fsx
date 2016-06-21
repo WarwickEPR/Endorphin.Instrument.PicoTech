@@ -46,7 +46,7 @@ let showTimeChart acquisition = async {
     do! Async.SwitchToContext ui // add the chart to the form using the UI sync context
     
     let chart =
-        Signal.voltageByTime (ChannelA, NoDownsamplingBuffer) acquisition
+        Signal.Single.voltageByTime (ChannelA, NoDownsamplingBuffer) acquisition
         |> Observable.scan (fun (t, x) (t', x') -> (t', 0.999f * x + 0.001f * x'))
         |> Observable.skip 500
         |> Observable.every 250
