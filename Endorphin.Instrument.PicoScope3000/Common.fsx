@@ -1,5 +1,5 @@
 #r "../Endorphin.Core/bin/Debug/Endorphin.Core.dll"
-#r "../Endorphin.Utilities.TimeInterval/bin/Debug/Endorphin.Utilities.TimeInterval.dll"
+#r "../Endorphin.Utilities/bin/Debug/Endorphin.Utilities.dll"
 #r "../packages/Rx-Linq.2.2.5/lib/net45/System.Reactive.Linq.dll"
 #r "../packages/Rx-Interfaces.2.2.5/lib/net45/System.Reactive.Interfaces.dll"
 #r "../packages/Rx-Core.2.2.5/lib/net45/System.Reactive.Core.dll"
