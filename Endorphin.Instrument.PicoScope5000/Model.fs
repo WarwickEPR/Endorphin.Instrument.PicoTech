@@ -277,17 +277,6 @@ module Model =
             | BlockParameters of BlockParameters
             | RapidBlockParameters of NumberOfCaptures * BlockParameters
 
-
-
-
-
-
-
-
-
-
-
-
     [<AutoOpen>]
     module Runtime =
 

@@ -33,7 +33,7 @@ writer.WriteLine "Time (s), Voltage (V)"
 
 form.Closed |> Observable.add (fun _ -> cts.Cancel() ; writer.Dispose())
 
-let streamingParameters = 
+let streamingParameters =
     // define the streaming parameters: 14 bit resolution, 20 ms sample interval, 64 kSample bufffer
     Parameters.Acquisition.create (Interval.from_ms 20<ms>) Resolution_14bit (64 * 1024)
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_2V   0.0f<V> FullBandwidth
@@ -44,9 +44,9 @@ let streamingParameters =
 
 let showTimeChart acquisition = async {
     do! Async.SwitchToContext ui // add the chart to the form using the UI sync context
-        
-    let chart = 
-        Chart.Combine [ 
+
+    let chart =
+        Chart.Combine [
             Signal.Single.voltageByTime (ChannelA, NoDownsamplingBuffer) acquisition
             |> Observable.observeOnContext ui
             |> LiveChart.FastLineIncremental
@@ -59,9 +59,9 @@ let showTimeChart acquisition = async {
 
     new ChartTypes.ChartControl(chart, Dock = DockStyle.Fill)
     |> form.Controls.Add
-    
-    let initialTime = DateTime.Now 
-    
+
+    let initialTime = DateTime.Now
+
     // Switch back to the thread pool to continue
     do! Async.SwitchToThreadPool() }
 
@@ -80,7 +80,7 @@ let showChartXY acquisition = async {
 
     new ChartTypes.ChartControl(chartXY, Dock = DockStyle.Fill)
     |> form.Controls.Add
-    
+
     // return to the thread pool context
     do! Async.SwitchToThreadPool() }
 
@@ -90,7 +90,7 @@ let writeToCsv acquisition =
 
 let printStatusUpdates acquisition =
     Acquisition.status acquisition
-    |> Observable.add (printfn "%A") // print stream status updates (preparing, streaming, finished...) 
+    |> Observable.add (printfn "%A") // print stream status updates (preparing, streaming, finished...)
 
 let printCumulativeSampleCount acquisition =
     Signal.Block.voltage (ChannelA, NoDownsamplingBuffer) acquisition
@@ -102,15 +102,15 @@ let printCumulativeSampleCount acquisition =
 let experiment picoScope = async {
     // create an acquisition with the previously defined parameters and start it after subscribing to its events
     let acquisition = Acquisition.prepare picoScope (StreamingParameters streamingParameters)
-    do! showTimeChart acquisition // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X 
+    do! showTimeChart acquisition // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X
     printStatusUpdates acquisition
     printCumulativeSampleCount acquisition
     writeToCsv acquisition
 
     let noWork = async { return () }
     let acquisitionHandle = Acquisition.startWithCancellationToken acquisition noWork cts.Token
-    
-    // wait for the acquisition to finish automatically or by cancellation   
+
+    // wait for the acquisition to finish automatically or by cancellation
     let! result = Acquisition.waitToFinish acquisitionHandle
     match result with
     | AcquisitionCompleted -> printfn "Stream completed successfully."
@@ -119,7 +119,7 @@ let experiment picoScope = async {
 
 Async.Start <| async {
     try
-        let! picoScope = PicoScope.openFirst() 
+        let! picoScope = PicoScope.openFirst()
         try
             do! experiment picoScope
         finally

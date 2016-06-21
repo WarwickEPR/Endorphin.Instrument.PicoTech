@@ -41,7 +41,7 @@ let showTimeChart inputs acquisition = async {
 
     new ChartTypes.ChartControl(chart, Dock = DockStyle.Fill)
     |> form.Controls.Add
-    
+
     // return to the thread pool context
     do! Async.SwitchToThreadPool() }
 
@@ -49,7 +49,7 @@ let noDownsampling picoScope = async {
     // create an acquisition with the previously defined parameters and start it after subscribing to its events
     let acquisition = Acquisition.prepare picoScope streamingParametersNoDownsampling
     let input = (ChannelA, NoDownsamplingBuffer)
-    do! showTimeChart input acquisition // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X 
+    do! showTimeChart input acquisition // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X
 
     printStatusUpdates acquisition
 //    printSampled acquisition

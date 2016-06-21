@@ -16,10 +16,9 @@ open Endorphin.Utilities.Time
 
 [<AutoOpen>]
 module Common =
-
     let printStatusUpdates acquisition =
         Acquisition.status acquisition
-        |> Observable.add (printfn "%A") // print stream status updates (preparing, streaming, finished...) 
+        |> Observable.add (printfn "%A") // print stream status updates (preparing, streaming, finished...)
 
     let printSamples inputs acquisition =
         Signal.Single.voltageByTime inputs acquisition

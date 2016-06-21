@@ -37,11 +37,6 @@ module Model =
     /// Sample index in a buffer.
     type SampleIndex = uint32
 
-
-
-
-
-
     [<AutoOpen>]
     /// Model types related to channel settings.
     module ChannelSettings =
@@ -126,23 +121,14 @@ module Model =
             | LedRepeat of counts : int16
             | LedIndefiniteRepeat
 
-
-
-
-
-
-
-
     [<AutoOpen>]
     module Triggering =
-
         type Channel =
             | AnalogueTrigger of channel : AnalogueChannel
             | ExternalTrigger
             | AuxiliaryTrigger
 
         module Simple =
-
             type Direction =
                 | Above
                 | Below
@@ -156,7 +142,6 @@ module Model =
                            Direction  : Direction }
 
         module Complex =
-
             type Source =
                 | Channel of channel : Channel
                 | DigitalTrigger
@@ -247,12 +232,6 @@ module Model =
         type TriggerSetting = { Trigger : Trigger
                                 Delay   : SampleCount option
                                 Auto    : AutoTriggerDelay option }
-
-
-
-
-
-
 
     [<AutoOpen>]
     /// Model types related to signal sampling and acquisition.
@@ -366,17 +345,6 @@ module Model =
             | StreamingParameters of StreamingParameters
             | BlockParameters of BlockParameters
             | RapidBlockParameters of NumberOfCaptures * BlockParameters
-
-
-
-
-
-
-
-
-
-
-
 
     [<AutoOpen>]
     module Runtime =

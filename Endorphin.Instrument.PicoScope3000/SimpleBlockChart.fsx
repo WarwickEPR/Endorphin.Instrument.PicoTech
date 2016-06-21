@@ -53,7 +53,7 @@ let showTimeChart inputs acquisition = async {
 
 //    new ChartTypes.ChartControl(chart, Dock = DockStyle.Fill)
 //    |> form.Controls.Add
-    
+
     // return to the thread pool context
     do! Async.SwitchToThreadPool() }
 
@@ -63,7 +63,7 @@ let noDownsampling picoScope = async {
     let acquisition = Acquisition.prepare picoScope blockParametersNoDownsampling
     let input = (Analogue ChannelA, NoDownsamplingBuffer)
     printStatusUpdates acquisition
-    displayTimeChart input acquisition // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X 
+    displayTimeChart input acquisition // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X
     printTotalCount input acquisition
     return acquisition
 }

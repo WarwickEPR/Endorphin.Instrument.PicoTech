@@ -22,7 +22,7 @@ let parameters =
     |> Parameters.Acquisition.withTrigger sweepTrigger
     |> Parameters.Block.create
     |> Parameters.Block.withPostTriggerSamples sampleCount
-    |> Parameters.Block.withBuffering AllCaptures 
+    |> Parameters.Block.withBuffering AllCaptures
 //    |> Parameters.Block.withBuffering SingleCapture
     |> Parameters.Block.rapidBlockCapture 10u
 

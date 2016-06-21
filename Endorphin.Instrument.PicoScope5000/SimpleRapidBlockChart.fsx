@@ -27,7 +27,7 @@ let rapidBlockParametersNoDownsampling =
     |> Parameters.Block.create
     |> Parameters.Block.withPreTriggerSamples 10000
     |> Parameters.Block.withPostTriggerSamples 90000
-    |> Parameters.Block.withBuffering (MultipleCapture 4u) 
+    |> Parameters.Block.withBuffering (MultipleCapture 4u)
 //    |> Parameters.Block.withBuffering SingleCapture
     |> Parameters.Block.rapidBlockCapture 50u
 let inputA = (ChannelA, NoDownsamplingBuffer)
@@ -44,7 +44,7 @@ let showTimeChart inputs acquisition = async {
 
     new ChartTypes.ChartControl(chart, Dock = DockStyle.Fill)
     |> form.Controls.Add
-    
+
     // return to the thread pool context
     do! Async.SwitchToThreadPool() }
 
@@ -82,4 +82,3 @@ Async.Start (async {
                 (fun exn -> printfn "Failed to close connection to PicoScope: %s" exn.Message),
                 ignore)
     with exn -> printfn "Experiment failed: %s" exn.Message })
-

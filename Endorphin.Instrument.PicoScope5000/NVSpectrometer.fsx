@@ -44,7 +44,7 @@ let vcoTune =
 
 let showTimeChart acquisition = async {
     do! Async.SwitchToContext ui // add the chart to the form using the UI sync context
-    
+
     let chart =
         Signal.Single.voltageByTime (ChannelA, NoDownsamplingBuffer) acquisition
         |> Observable.scan (fun (t, x) (t', x') -> (t', 0.999f * x + 0.001f * x'))

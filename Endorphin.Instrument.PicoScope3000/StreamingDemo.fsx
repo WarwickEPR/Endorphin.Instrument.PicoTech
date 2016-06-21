@@ -62,7 +62,7 @@ let streamingParametersNoDownsampling =
 let inputNoDownsampling = (Analogue ChannelA, NoDownsamplingBuffer)
 
 let simpleTrigger = Trigger.General.simple Range_1V Simple.Rising 0.0f<V> (AnalogueTrigger ChannelA)
-let advTrigger = Trigger.General.complex 
+let advTrigger = Trigger.General.complex
 
 let blockParametersNoDownsampling =
     Parameters.Acquisition.create (Interval.from_ps 1200<ps>) (1<<<17)
@@ -115,7 +115,7 @@ let showTimeChart inputs acquisition max = async {
 
     new ChartTypes.ChartControl(chart, Dock = DockStyle.Fill)
     |> form.Controls.Add
-    
+
     // return to the thread pool context
     do! Async.SwitchToThreadPool() }
 
@@ -136,7 +136,7 @@ let showDualAggregateChart inputA inputB acquisition = async {
 
     new ChartTypes.ChartControl(chart, Dock = DockStyle.Fill)
     |> form.Controls.Add
-    
+
     // return to the thread pool context
     do! Async.SwitchToThreadPool() }
 
@@ -178,7 +178,7 @@ let showChartXY inputA inputB acquisition = async {
 
 let printStatusUpdates acquisition =
     Acquisition.status acquisition
-    |> Observable.add (printfn "%A") // print stream status updates (preparing, streaming, finished...) 
+    |> Observable.add (printfn "%A") // print stream status updates (preparing, streaming, finished...)
 
 let printSamples inputs acquisition =
     Signal.Single.voltageByTime inputs acquisition
@@ -244,7 +244,7 @@ let noDownsampling picoScope = async {
     // create an acquisition with the previously defined parameters and start it after subscribing to its events
     let acquisition = Acquisition.prepare picoScope streamingParametersNoDownsampling
     let input = inputNoDownsampling
-//    do! showTimeChart input acquisition 12.0 // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X 
+//    do! showTimeChart input acquisition 12.0 // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X
 
     printStatusUpdates acquisition
 //    printSampled acquisition
@@ -258,7 +258,7 @@ let blockNoDownsampling picoScope = async {
     // create an acquisition with the previously defined parameters and start it after subscribing to its events
     let acquisition = Acquisition.prepare picoScope blockParametersNoDownsampling
     let input = inputBlockNoDownsampling
-//    do! showTimeChart input acquisition 0.001 // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X 
+//    do! showTimeChart input acquisition 0.001 // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X
 
     printStatusUpdates acquisition
 //    printSamples input acquisition
@@ -276,7 +276,7 @@ let averaging picoScope = async {
     // create an acquisition with the previously defined parameters and start it after subscribing to its events
     let acquisition = Acquisition.prepare picoScope streamingParametersAveraged
     let input = inputAveraged
-    do! showTimeChart input acquisition 12.0 // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X 
+    do! showTimeChart input acquisition 12.0 // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X
 
     printStatusUpdates acquisition
 //    printSampled acquisition
@@ -289,7 +289,7 @@ let averaging picoScope = async {
 let aggregates picoScope = async {
     // create an acquisition with the previously defined parameters and start it after subscribing to its events
     let acquisition = Acquisition.prepare picoScope streamingParameters2
-    do! showDualAggregateChart inputA inputB acquisition // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X 
+    do! showDualAggregateChart inputA inputB acquisition // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X
     printStatusUpdates acquisition
     return acquisition
 }
@@ -297,7 +297,7 @@ let aggregates picoScope = async {
 let plot2d picoScope = async {
     // create an acquisition with the previously defined parameters and start it after subscribing to its events
     let acquisition = Acquisition.prepare picoScope streamingParameters2
-    do! showChartXY inputA inputB acquisition // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X 
+    do! showChartXY inputA inputB acquisition // use showTimeChart to show X and Y vs T or showXYChart to to plot Y vs X
     printStatusUpdates acquisition
     return acquisition
 }

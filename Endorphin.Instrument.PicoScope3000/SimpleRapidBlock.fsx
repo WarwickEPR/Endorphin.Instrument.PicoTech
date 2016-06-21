@@ -17,7 +17,7 @@ let rapidBlockParametersNoDownsampling =
     |> Parameters.Block.create
     |> Parameters.Block.withPreTriggerSamples 10000
     |> Parameters.Block.withPostTriggerSamples 90000
-    |> Parameters.Block.withBuffering (MultipleCapture 4u) 
+    |> Parameters.Block.withBuffering (MultipleCapture 4u)
 //    |> Parameters.Block.withBuffering SingleCapture
     |> Parameters.Block.rapidBlockCapture 50u
 let inputA = (Analogue ChannelA, NoDownsamplingBuffer)
