@@ -7,7 +7,7 @@ open NativeModel
 open StatusCodes
 open System
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
-open Endorphin.Utilities.TimeInterval
+open Endorphin.Utilities.Time
 
 /// Contains functions related to parsing between native model and high level model domain
 /// types.

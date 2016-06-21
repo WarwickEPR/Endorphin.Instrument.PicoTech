@@ -4,7 +4,7 @@ namespace Endorphin.Instrument.PicoScope5000
 
 open System.Runtime.CompilerServices
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
-open Endorphin.Utilities.TimeInterval
+open Endorphin.Utilities.Time
 
 [<RequireQualifiedAccess>]
 /// Functions related to vertical resolution for digital samples. The PicoScope 5000
@@ -76,7 +76,7 @@ module Timebase =
     // using programming guide, section 3.6 for USB 3.0 models of PicoScope 3000
     // May not have all modes available, unless some channels are disabled
     let timebase (sampleInterval : Interval) =
-        let ns = sampleInterval.AsLongNanoseconds
+        let ns = sampleInterval.asLong_ns
 
         if ns < 2L<ns>      then 0u   // 1 ns
         else if ns < 4L<ns> then 1u   // 2 ns

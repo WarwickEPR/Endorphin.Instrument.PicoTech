@@ -5,7 +5,7 @@ open System
 open System.Threading
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Endorphin.Instrument.PicoScope5000
-open Endorphin.Utilities.TimeInterval
+open Endorphin.Utilities.Time
 
 open System.Windows.Forms
 open FSharp.Charting
@@ -21,7 +21,7 @@ form.Closed |> Observable.add (fun _ -> cts.Cancel())
 
 
 let streamingParametersNoDownsampling =
-    Parameters.Acquisition.create (fromMicroseconds 5<us>) Resolution_14bit (1<<<18)
+    Parameters.Acquisition.create (Interval.from_us 5<us>) Resolution_14bit (1<<<18)
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_10mV 0.0f<V> FullBandwidth
     |> Parameters.Acquisition.sampleChannel ChannelA NoDownsampling
     |> Parameters.Streaming.create

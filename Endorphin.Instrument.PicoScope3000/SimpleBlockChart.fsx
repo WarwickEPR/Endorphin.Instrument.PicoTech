@@ -5,7 +5,7 @@ open System
 open System.Threading
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Endorphin.Instrument.PicoScope3000
-open Endorphin.Utilities.TimeInterval
+open Endorphin.Utilities.Time
 
 open System.Windows.Forms
 open FSharp.Charting
@@ -20,7 +20,7 @@ let cts = new CancellationTokenSource()
 form.Closed |> Observable.add (fun _ -> cts.Cancel())
 
 let blockParametersNoDownsampling =
-    Parameters.Acquisition.create (TimeInterval.fromNanoseconds 2<ns>) (1<<<10)
+    Parameters.Acquisition.create (Interval.from_ns 2<ns>) (1<<<10)
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_50mV 0.0f<V> FullBandwidth
     |> Parameters.Acquisition.sampleChannel ChannelA NoDownsampling
     |> Parameters.Acquisition.withTrigger (Trigger.auto 50s<ms>)

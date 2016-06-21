@@ -5,7 +5,7 @@ open System
 open System.Threading
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Endorphin.Instrument.PicoScope5000
-open Endorphin.Utilities.TimeInterval
+open Endorphin.Utilities.Time
 
 let channels = [ ChannelA; ChannelB]
 let channelOut = [ (ChannelA,AveragedBuffer), (ChannelB,AveragedBuffer) ]
@@ -15,7 +15,7 @@ let parameters =
     let sampleCount = 1000
     let downsamplingRatio' = 100u
     let sweepTrigger = Trigger.simple Trigger.external triggerLevel Rising 100u
-    Parameters.Acquisition.create (TimeInterval.fromMicroseconds 10<us>) Resolution_14bit (64 * 1024)
+    Parameters.Acquisition.create (Interval.from_us 10<us>) Resolution_14bit (64 * 1024)
     |> Parameters.Acquisition.enableChannels channels DC Range_10V 0.0f<V> Bandwidth_20MHz
     |> Parameters.Acquisition.sampleChannels channels Averaged
     |> Parameters.Acquisition.withDownsamplingRatio downsamplingRatio'

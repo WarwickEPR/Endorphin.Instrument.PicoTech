@@ -6,7 +6,7 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Endorphin.Core
 open FSharp.Control.Reactive
 open System.Reactive.Concurrency
-open Endorphin.Utilities.TimeInterval
+open Endorphin.Utilities.Time
 
 /// Functions for obtaining the signal projections for an acquisition.
 module Signal =
@@ -20,7 +20,7 @@ module Signal =
             match downsampling with
             | None -> 1.0
             | Some ratio -> float ratio
-        interval.AsFloatSeconds * (float index) * ratio
+        interval.asFloat_s * (float index) * ratio
 
     /// Returns a function which converts an ADC count to a voltage for the given input sampling in an
     /// acquisition.

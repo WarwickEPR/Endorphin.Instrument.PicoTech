@@ -80,8 +80,8 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Endorphin.Utilities.TimeInterval\Endorphin.Utilities.TimeInterval.fsproj">
-      <Name>Endorphin.Utilities.TimeInterval</Name>
+    <ProjectReference Include="..\Endorphin.Utilities.TimeInterval\Endorphin.Utilities.Time.fsproj">
+      <Name>Endorphin.Utilities.Time</Name>
       <Project>{b9534494-747d-4623-a0e7-fb8e53678988}</Project>
       <Private>True</Private>
     </ProjectReference>

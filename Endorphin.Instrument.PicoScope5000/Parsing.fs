@@ -4,7 +4,7 @@ namespace Endorphin.Instrument.PicoScope5000
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Endorphin.Core
-open Endorphin.Utilities.TimeInterval
+open Endorphin.Utilities.Time
 open NativeModel
 open StatusCodes
 
@@ -72,11 +72,11 @@ module internal Parsing =
     let parseIntervalWithInterval (interval, unit) =
         match unit with
         | TimeUnitEnum.Femtoseconds -> Interval_fs (LanguagePrimitives.Int32WithMeasure interval)
-        | TimeUnitEnum.Picoseconds  -> Interval_ps  (LanguagePrimitives.Int32WithMeasure interval)
-        | TimeUnitEnum.Nanoseconds  -> Interval_ns  (LanguagePrimitives.Int32WithMeasure interval)
+        | TimeUnitEnum.Picoseconds  -> Interval_ps (LanguagePrimitives.Int32WithMeasure interval)
+        | TimeUnitEnum.Nanoseconds  -> Interval_ns (LanguagePrimitives.Int32WithMeasure interval)
         | TimeUnitEnum.Microseconds -> Interval_us (LanguagePrimitives.Int32WithMeasure interval)
         | TimeUnitEnum.Milliseconds -> Interval_ms (LanguagePrimitives.Int32WithMeasure interval)
-        | TimeUnitEnum.Seconds      -> Interval_s      (LanguagePrimitives.Int32WithMeasure interval)
+        | TimeUnitEnum.Seconds      -> Interval_s  (LanguagePrimitives.Int32WithMeasure interval)
         | enum                      -> failwithf "Unexpected time unit enum value: %A" enum
 
     /// Converts the provided interval with unit of measure to an integer interval with an

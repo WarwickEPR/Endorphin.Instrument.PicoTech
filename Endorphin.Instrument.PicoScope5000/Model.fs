@@ -6,7 +6,7 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 
 open Endorphin.Core.CommandRequestAgent
 open Endorphin.Core
-open Endorphin.Utilities.TimeInterval
+open Endorphin.Utilities.Time
 
 [<AutoOpen>]
 /// PicoScope 5000 series high level model types.

@@ -21,7 +21,7 @@ open FSharp.Control.Reactive
 
 open Endorphin.Core
 open Endorphin.Instrument.PicoScope5000
-open Endorphin.Utilities.TimeInterval
+open Endorphin.Utilities.Time
 
 let form = new Form(Visible = true, TopMost = true, Width = 800, Height = 600)
 let ui = SynchronizationContext.Current
@@ -29,7 +29,7 @@ let cts = new CancellationTokenSource()
 
 let streamingParameters =
     // define the streaming parameters: 14 bit resolution, 20 ms sample interval, 64 kSample bufffer
-    Parameters.Acquisition.create (TimeInterval.fromMicroseconds 10<us>) Resolution_14bit (64 * 1024)
+    Parameters.Acquisition.create (Interval.from_us 10<us>) Resolution_14bit (64 * 1024)
     |> Parameters.Acquisition.enableChannel ChannelA DC Range_2V -2.5f<V> FullBandwidth
     |> Parameters.Acquisition.sampleChannels [ ChannelA ] NoDownsampling
     |> Parameters.Streaming.create

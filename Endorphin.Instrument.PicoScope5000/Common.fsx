@@ -12,7 +12,7 @@
 open System
 open FSharp.Control.Reactive
 open Endorphin.Instrument.PicoScope5000
-open Endorphin.Utilities.TimeInterval
+open Endorphin.Utilities.Time
 
 [<AutoOpen>]
 module Common =

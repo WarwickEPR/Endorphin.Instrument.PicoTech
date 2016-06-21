@@ -3,7 +3,7 @@
 namespace Endorphin.Instrument.PicoScope3000
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
-open Endorphin.Utilities.TimeInterval
+open Endorphin.Utilities.Time
 open Endorphin.Core
 
 [<AutoOpen>]
