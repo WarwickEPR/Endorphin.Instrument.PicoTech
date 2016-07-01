@@ -1,0 +1,24 @@
+source https://nuget.org/api/v2
+
+nuget FSharp.Core redirects: force
+nuget FSharp.Control.Reactive ~> 3.4.1
+nuget FSharp.Charting
+
+nuget Rx-PlatformServices ~> 2.2.5
+
+nuget Endorphin.Core
+nuget Endorphin.Abstract
+
+github WarwickEPR/Endorphin.Core src/Endorphin.Core.Reactive.fs
+github WarwickEPR/Endorphin.Core src/Endorphin.Core.Collections.fs
+github WarwickEPR/Endorphin.Core src/Endorphin.Core.Choice.fs
+github WarwickEPR/Endorphin.Core src/Endorphin.Core.Control.fs
+
+group Build
+    source https://nuget.org/api/v2
+
+    nuget SourceLink.Fake
+    nuget FAKE
+    nuget FSharp.Formatting
+
+    github fsharp/FAKE modules/Octokit/Octokit.fsx

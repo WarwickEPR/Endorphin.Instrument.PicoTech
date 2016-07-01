@@ -1,0 +1,10 @@
+FSharp.Core
+FSharp.Control.Reactive
+Rx-PlatformServices
+Endorphin.Core
+Endorphin.Abstract
+
+File:Endorphin.Core.Reactive.fs
+File:Endorphin.Core.Collections.fs
+File:Endorphin.Core.Choice.fs
+File:Endorphin.Core.Control.fs

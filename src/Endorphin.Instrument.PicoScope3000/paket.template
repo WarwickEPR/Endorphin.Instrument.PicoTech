@@ -1,0 +1,23 @@
+type project
+title
+    Endorphin.Instrument.PicoTech.PicoScope3000
+owners
+    University of Warwick EPR and Diamond group
+authors 
+    University of Warwick EPR and Diamond group
+projectUrl
+    https://warwickepr.github.io/Endorphin.Instrument.PicoTech.PicoScope3000
+iconUrl
+    https://raw.githubusercontent.com/WarwickEPR/Endorphin.Instrument.PicoTech/master/docs/files/img/logo.png
+licenseUrl
+    http://github.com/WarwickEPR/Endorphin.Instrument.PicoTech/blob/master/LICENSE.txt
+requireLicenseAcceptance
+    false
+copyright
+    Copyright 2015
+tags
+    fsharp science
+summary
+    F# wrapper for PicoTech PicoScope3000 series PC oscilloscope.
+description
+    F# wrapper for PicoTech PicoScope3000 series PC oscilloscope.
