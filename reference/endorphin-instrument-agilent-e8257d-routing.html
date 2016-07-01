@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Routing - Endorphin.Instrument.Agilent.E8257D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content=""/>
+    <meta name="author" content="University of Warwick EPR and Diamond group"/>
+
+    <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet"/>
+
+    <link type="text/css" rel="stylesheet" href="/Endorphin.Instrument.Agilent.E8257D/content/style.css" />
+    <script type="text/javascript" src="/Endorphin.Instrument.Agilent.E8257D/content/tips.js"></script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://fsharp.org">fsharp.org</a></li>
+          <li><a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D">github page</a></li>
+        </ul>
+        <h3 class="muted"><a href="/Endorphin.Instrument.Agilent.E8257D/index.html">Endorphin.Instrument.Agilent.E8257D</a></h3>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="span9" id="main">
+          
+
+
+
+<h1>Routing</h1>
+<p>
+  <span>Namespace: Endorphin.Instrument.Agilent.E8257D</span><br />
+</p>
+<div class="xmldoc">
+</div>
+
+<!-- Render nested types and modules, if there are any -->
+
+  <h3>Functions and values</h3>
+  <table class="table table-bordered member-list">
+    <thead>
+      <tr><td>Function or value</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '45', 45)" onmouseover="showTip(event, '45', 45)">
+            empty 
+          </code>
+          <div class="tip" id="45">
+            <strong>Signature:</strong> Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L192-192" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>The default routings for the machine, in use after a *RST command.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '46', 46)" onmouseover="showTip(event, '46', 46)">
+            query instrument
+          </code>
+          <div class="tip" id="46">
+            <strong>Signature:</strong> instrument:RfSource -&gt; Async&lt;Routing&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L473-473" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Query the machine for the currently setup routings.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '47', 47)" onmouseover="showTip(event, '47', 47)">
+            set instrument routing
+          </code>
+          <div class="tip" id="47">
+            <strong>Signature:</strong> instrument:RfSource -&gt; routing:Routing -&gt; Async&lt;unit&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L418-418" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set all the routings for the machine to the given values.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '48', 48)" onmouseover="showTip(event, '48', 48)">
+            withAlcHold value routing
+          </code>
+          <div class="tip" id="48">
+            <strong>Signature:</strong> value:IMarkerSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L267-267" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the ALC hold function. This overwrites the RF blank function.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '49', 49)" onmouseover="showTip(event, '49', 49)">
+            withAlternateAmplitude value routing
+          </code>
+          <div class="tip" id="49">
+            <strong>Signature:</strong> value:IMarkerSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L263-263" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the alternate amplitude function.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '50', 50)" onmouseover="showTip(event, '50', 50)">
+            withBasebandTrigger1 value routing
+          </code>
+          <div class="tip" id="50">
+            <strong>Signature:</strong> value:IUserSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L209-209" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the BBTRIG1 connector. Overwrites any inputs set to come into this BNC.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '51', 51)" onmouseover="showTip(event, '51', 51)">
+            withBasebandTrigger2 value routing
+          </code>
+          <div class="tip" id="51">
+            <strong>Signature:</strong> value:IUserSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L213-213" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the BBTRIG2 connector. Overwrites any inputs set to come into this BNC.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '52', 52)" onmouseover="showTip(event, '52', 52)">
+            withEvent1 value routing
+          </code>
+          <div class="tip" id="52">
+            <strong>Signature:</strong> value:IUserSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L218-218" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the EVENT1 connector. Overwrites any inputs set to come into this BNC.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '53', 53)" onmouseover="showTip(event, '53', 53)">
+            withMarker1Polarity value routing
+          </code>
+          <div class="tip" id="53">
+            <strong>Signature:</strong> value:Polarity -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L282-282" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the polarity of marker 1.  Positive means the marker signal is high while the marker
+is set to true.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '54', 54)" onmouseover="showTip(event, '54', 54)">
+            withMarker2Polarity value routing
+          </code>
+          <div class="tip" id="54">
+            <strong>Signature:</strong> value:Polarity -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L287-287" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the polarity of marker 2.  Positive means the marker signal is high while the marker
+is set to true.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '55', 55)" onmouseover="showTip(event, '55', 55)">
+            withMarker3Polarity value routing
+          </code>
+          <div class="tip" id="55">
+            <strong>Signature:</strong> value:Polarity -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L292-292" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the polarity of marker 3.  Positive means the marker signal is high while the marker
+is set to true.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '56', 56)" onmouseover="showTip(event, '56', 56)">
+            withMarker4Polarity value routing
+          </code>
+          <div class="tip" id="56">
+            <strong>Signature:</strong> value:Polarity -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L297-297" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the polarity of marker 4.  Positive means the marker signal is high while the marker
+is set to true.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '57', 57)" onmouseover="showTip(event, '57', 57)">
+            withPatternTrigger value routing
+          </code>
+          <div class="tip" id="57">
+            <strong>Signature:</strong> value:IUserSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L223-223" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the PATTRIG connector. Overwrites any inputs set to come into this BNC.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '58', 58)" onmouseover="showTip(event, '58', 58)">
+            withPatternTrigger1 value routing
+          </code>
+          <div class="tip" id="58">
+            <strong>Signature:</strong> value:IUserBncSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L252-252" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the internal signal pattern trigger 1.  This overwrites any output
+signal on the given BNC.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '59', 59)" onmouseover="showTip(event, '59', 59)">
+            withPatternTrigger2 value routing
+          </code>
+          <div class="tip" id="59">
+            <strong>Signature:</strong> value:IUserBncSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L258-258" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the internal signal pattern trigger 2.  This overwrites any output
+signal on the given BNC.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '60', 60)" onmouseover="showTip(event, '60', 60)">
+            withRfBlank value routing
+          </code>
+          <div class="tip" id="60">
+            <strong>Signature:</strong> value:IMarkerSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L274-274" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the RF blanking function. This overwrites the ALC hold function.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '61', 61)" onmouseover="showTip(event, '61', 61)">
+            withSweepOut value routing
+          </code>
+          <div class="tip" id="61">
+            <strong>Signature:</strong> value:ISweepOutSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L228-228" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the SWEEPOUT connector.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '62', 62)" onmouseover="showTip(event, '62', 62)">
+            withTrigger1 value routing
+          </code>
+          <div class="tip" id="62">
+            <strong>Signature:</strong> value:ITriggerSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L232-232" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the TRIG1 connector.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '63', 63)" onmouseover="showTip(event, '63', 63)">
+            withTrigger2 value routing
+          </code>
+          <div class="tip" id="63">
+            <strong>Signature:</strong> value:ITriggerSignal -&gt; routing:Routing -&gt; Routing<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D/tree/master/src/Endorphin.Instrument.Agilent.E8257D/Routing.fs#L235-235" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Set the routing of the TRIG2 connector.</p>
+
+
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+        </div>
+        <div class="span3">
+          <img src="/Endorphin.Instrument.Agilent.E8257D/img/logo.png" alt="F# Project" style="width:150px;margin:10px" />  
+          <ul class="nav nav-list" id="menu" style="margin-top: 20px;">
+            <li class="nav-header">Endorphin.Instrument.Agilent.E8257D</li>
+            <li><a href="/Endorphin.Instrument.Agilent.E8257D/index.html">Home page</a></li>
+            <li class="divider"></li>
+            <li><a href="http://nuget.org/packages/Endorphin.Instrument.Agilent.E8257D">Get Library via NuGet</a></li>
+            <li><a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D">Source Code on GitHub</a></li>
+            <li><a href="/Endorphin.Instrument.Agilent.E8257D/license.html">License</a></li>
+            <li><a href="/Endorphin.Instrument.Agilent.E8257D/release-notes.html">Release Notes</a></li>
+            
+            <li class="nav-header">Getting started</li>
+            <li><a href="/Endorphin.Instrument.Agilent.E8257D/tutorial.html">Sample tutorial</a></li>
+
+            <li class="nav-header">Documentation</li>
+            <li><a href="/Endorphin.Instrument.Agilent.E8257D/reference/index.html">API Reference</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <a href="http://github.com/WarwickEPR/Endorphin.Instrument.Agilent.E8257D"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"/></a>
+  </body>
+  </html>
