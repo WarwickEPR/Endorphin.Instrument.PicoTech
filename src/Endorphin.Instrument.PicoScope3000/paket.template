@@ -1,12 +1,12 @@
 type project
 title
-    Endorphin.Instrument.PicoTech.PicoScope3000
+    Endorphin.Instrument.PicoTech.PicoScope5000
 owners
     University of Warwick EPR and Diamond group
 authors 
     University of Warwick EPR and Diamond group
 projectUrl
-    https://warwickepr.github.io/Endorphin.Instrument.PicoTech.PicoScope3000
+    https://warwickepr.github.io/Endorphin.Instrument.PicoTech.PicoScope5000
 iconUrl
     https://raw.githubusercontent.com/WarwickEPR/Endorphin.Instrument.PicoTech/master/docs/files/img/logo.png
 licenseUrl
