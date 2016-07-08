@@ -76,10 +76,10 @@ module Model =
 
         /// All input settings for an enabled input channel.
         type InputSettings =
-            internal { Coupling       : Coupling
-                       Range          : Range
-                       AnalogueOffset : Voltage
-                       BandwidthLimit : Bandwidth }
+            { Coupling       : Coupling
+              Range          : Range
+              AnalogueOffset : Voltage
+              BandwidthLimit : Bandwidth }
 
         /// Indicates whether a channel is enabled and contains its input settings if so.
         type ChannelSettings =

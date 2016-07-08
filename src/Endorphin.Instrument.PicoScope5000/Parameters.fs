@@ -41,10 +41,20 @@ module Parameters =
         let enableChannel channel coupling range voltageOffset bandwidth (parameters : AcquisitionParameters) =
             { parameters with Inputs = parameters.Inputs |> Inputs.enableChannel channel coupling range voltageOffset bandwidth }
 
+        /// Returns modified streaming acquisition parameters with the specified input channel enabled with the
+        /// given input settings. Fails if the channel is already enabled.
+        let enableChannelBySettings channel (settings : InputSettings) (parameters : AcquisitionParameters) =
+            { parameters with Inputs = parameters.Inputs |> Inputs.enableChannel channel settings.Coupling settings.Range settings.AnalogueOffset settings.BandwidthLimit }
+
         /// Returns modified acquisition parameters with the specified list of input channels enabled
         /// with the given input settings. Fails if any of the channels in the set is already enabled.
         let enableChannels channels coupling range voltageOffset bandwidth (parameters : AcquisitionParameters) =
             { parameters with Inputs = parameters.Inputs |> Inputs.enableChannels channels coupling range voltageOffset bandwidth }
+
+        /// Returns modified streaming acquisition parameters with the specified input channel enabled with the
+        /// given input settings. Fails if the channel is already enabled.
+        let enableChannelsBySettings channels (settings : InputSettings) (parameters : AcquisitionParameters) =
+            { parameters with Inputs = parameters.Inputs |> Inputs.enableChannels channels settings.Coupling settings.Range settings.AnalogueOffset settings.BandwidthLimit }
 
         let private sampleInputChannel channel downsamplingMode (parameters : AcquisitionParameters) =
             { parameters with Inputs = parameters.Inputs |> Inputs.sampleChannel channel downsamplingMode }
