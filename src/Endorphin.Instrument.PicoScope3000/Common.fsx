@@ -9,7 +9,7 @@
 #r "Rx-Interfaces/lib/net45/System.Reactive.Interfaces.dll"
 #r "Rx-Core/lib/net45/System.Reactive.Core.dll"
 #r "FSharp.Charting/lib/net40/FSharp.Charting.dll"
-#r "bin/Debug/Endorphin.Instrument.PicoTech.PicoScope3000.dll"
+#r "bin/Release/Endorphin.Instrument.PicoTech.PicoScope3000.dll"
 #r "System.Windows.Forms.DataVisualization.dll"
 #r "System.Windows.Forms.DataVisualization.dll"
 
