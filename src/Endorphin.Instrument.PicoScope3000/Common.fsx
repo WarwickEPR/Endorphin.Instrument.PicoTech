@@ -2,12 +2,12 @@
 
 #I "../../packages/"
 
-#r "Endorphin.Core/lib/net452/Endorphin.Core.dll"
-#r "Endorphin.Abstract/lib/net452/Endorphin.Abstract.dll"
-#r "FSharp.Control.Reactive/lib/net40/FSharp.Control.Reactive.dll"
 #r "Rx-Linq/lib/net45/System.Reactive.Linq.dll"
 #r "Rx-Interfaces/lib/net45/System.Reactive.Interfaces.dll"
 #r "Rx-Core/lib/net45/System.Reactive.Core.dll"
+#r "Endorphin.Core/lib/net452/Endorphin.Core.dll"
+#r "Endorphin.Abstract/lib/net452/Endorphin.Abstract.dll"
+#r "FSharp.Control.Reactive/lib/net40/FSharp.Control.Reactive.dll"
 #r "FSharp.Charting/lib/net40/FSharp.Charting.dll"
 #r "bin/Release/Endorphin.Instrument.PicoTech.PicoScope3000.dll"
 #r "System.Windows.Forms.DataVisualization.dll"
