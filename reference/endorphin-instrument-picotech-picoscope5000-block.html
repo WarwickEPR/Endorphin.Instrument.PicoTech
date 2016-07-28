@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>BlockAcquisition - Endorphin.Instrument.PicoTech</title>
+    <title>Block - Endorphin.Instrument.PicoTech</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content=""/>
     <meta name="author" content="University of Warwick EPR and Diamond group"/>
@@ -35,53 +35,82 @@
 
 
 
-<h1>BlockAcquisition</h1>
+<h1>Block</h1>
 <p>
   <span>Namespace: Endorphin.Instrument.PicoTech.PicoScope5000</span><br />
-  <span>Parent Module: <a href="endorphin-instrument-picotech-picoscope5000-model-runtime-block.html">Block</a></span>
 </p>
 <div class="xmldoc">
 </div>
-  <h3>Record Fields</h3>
+
+<!-- Render nested types and modules, if there are any -->
+
+  <h3>Functions and values</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Record Field</td><td>Description</td></tr>
+      <tr><td>Function or value</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '637', 637)" onmouseover="showTip(event, '637', 637)">
-            Common
+          <code onmouseout="hideTip(event, '187', 187)" onmouseover="showTip(event, '187', 187)">
+            finish acquisition handle
           </code>
-          <div class="tip" id="637">
-            <strong>Signature:</strong> AcquisitionCommon<br />
+          <div class="tip" id="187">
+            <strong>Signature:</strong> acquisition:BlockAcquisition -&gt; handle:IDisposable -&gt; Async&lt;unit&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.PicoTech/tree/master/src/Endorphin.Instrument.PicoScope5000/Model.fs#L364-364" class="github-link">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.PicoTech/tree/master/src/Endorphin.Instrument.PicoScope5000/Acquisition.fs#L429-429" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Mark the acquisition as finished, and remove any pinning handles from the buffers
+so the GC can function properly again.</p>
+
+
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '638', 638)" onmouseover="showTip(event, '638', 638)">
-            Parameters
+          <code onmouseout="hideTip(event, '188', 188)" onmouseover="showTip(event, '188', 188)">
+            next acquisition timebase
           </code>
-          <div class="tip" id="638">
-            <strong>Signature:</strong> BlockParameters<br />
+          <div class="tip" id="188">
+            <strong>Signature:</strong> acquisition:BlockAcquisition -&gt; timebase:TimebaseParameters -&gt; Async&lt;unit&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.PicoTech/tree/master/src/Endorphin.Instrument.PicoScope5000/Model.fs#L365-365" class="github-link">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.PicoTech/tree/master/src/Endorphin.Instrument.PicoScope5000/Acquisition.fs#L421-421" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Given a calculated machine timebase and an acquisition, instruct the PicoScope
+to take the next block as soon as the next trigger is detected.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '189', 189)" onmouseover="showTip(event, '189', 189)">
+            prepare scope parameters
+          </code>
+          <div class="tip" id="189">
+            <strong>Signature:</strong> scope:PicoScope5000 -&gt; parameters:BlockParameters -&gt; Async&lt;BlockAcquisition * TimebaseParameters * IDisposable&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="http://github.com/WarwickEPR/Endorphin.Instrument.PicoTech/tree/master/src/Endorphin.Instrument.PicoScope5000/Acquisition.fs#L411-411" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Prepare the scope for block acquisition.  No data will be taken yet, but all handles
+will be created, the correct timebase found, and buffers allocated.</p>
+
+
         </td>
       </tr>
     </tbody>
