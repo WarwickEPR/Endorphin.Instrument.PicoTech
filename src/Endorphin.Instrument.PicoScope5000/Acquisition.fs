@@ -56,7 +56,7 @@ module Acquisition =
                 | None     -> return () }
 
 
-    module private Block =
+    module internal Block =
 
         /// Allocate buffers for transferring captured samples in block mode
         let private allocateBlockBuffers (parameters:BlockParameters) =
@@ -401,3 +401,35 @@ module Acquisition =
         stop acquisitionHandle
         waitToFinish acquisitionHandle
 
+// SUPER HACKY PENDING REWRITE OF THE WHOLE BLOCK ACQUISITION
+// This stuff is basically just in here so my project can use multiple block acquisition -
+// it's ugly and not well thought out.  Various parts of this are async-blocking, so not in
+// any way ideal, but w/e.
+module Block =
+    /// Prepare the scope for block acquisition.  No data will be taken yet, but all handles
+    /// will be created, the correct timebase found, and buffers allocated.
+    let prepare scope (parameters : BlockParameters) = async {
+        let acq = Acquisition.Block.create scope parameters
+        let buf = Inputs.Buffers.createPinningHandle acq.Common.DataBuffers
+        do! Common.prepareDevice (BlockAcquisition acq)
+        do! Common.setDataBuffersByChannel MemorySegment.zero 0 acq.Common
+        let! timebase = PicoScope.Sampling.findTimebaseForSampleInterval scope MemorySegment.zero acq.Common.Parameters.SampleInterval
+        return (acq, timebase, buf) }
+
+    /// Given a calculated machine timebase and an acquisition, instruct the PicoScope
+    /// to take the next block as soon as the next trigger is detected.
+    let next (acquisition : BlockAcquisition) (timebase : TimebaseParameters) = async {
+        acquisition.Common.StatusChanged.Trigger (Next <| Acquiring timebase.SampleInterval)
+        let! handle = PicoScope.Acquisition.runBlock acquisition.Common.PicoScope acquisition timebase.Timebase 0u
+        do! Acquisition.Block.awaitingTrigger acquisition
+        do! Acquisition.Block.fetchBlocks acquisition }
+
+    /// Mark the acquisition as finished, and remove any pinning handles from the buffers
+    /// so the GC can function properly again.
+    let finish (acquisition : BlockAcquisition) (handle : IDisposable) = async {
+        try
+            do! PicoScope.Acquisition.stop acquisition.Common.PicoScope
+            acquisition.Common.StatusChanged.Trigger Completed
+        with
+            | exn -> acquisition.Common.StatusChanged.Trigger (Error exn)
+        return handle.Dispose () }
