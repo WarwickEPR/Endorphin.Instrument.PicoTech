@@ -1,3 +1,6 @@
+#### 0.2.1 - 2016-09-09
+* Fix the mapping of ADC count to voltage on multi-channel block acquisition
+
 #### 0.2.0 - 2016-07-28
 * Add multiple block acquisition
 

@@ -70,6 +70,7 @@ module Signal =
     let private sampleInterval a =
         (acquisitionParameters a).SampleInterval
 
+    /// Retrieves the timebase, which is only definitively chosen by the scope at runtime
     let private sampleIntervalEvent acquisition =
         Acquisition.status acquisition
         |> Observable.choose (function | Acquiring interval -> Some interval | _ -> None)
@@ -337,7 +338,14 @@ module Signal =
 
         /// Returns an observable which emits an array of voltages for every block observed on the specified
         /// array of inputs in an acquisition.
-        let voltages inputs acquisition = createObservable adcCountsEvent (adcCountsToVoltages inputs (acquisitionParameters acquisition)) inputs acquisition
+        let voltages (inputs:(InputChannel*BufferDownsampling)[]) acquisition =
+
+            let adcToVoltage input data =
+                let toVoltage = adcCountToVoltage input (acquisitionParameters acquisition)
+                Array.map toVoltage data
+
+            adcCountsEvent inputs acquisition
+            |> Observable.map ( Array.zip inputs >> Array.map (fun (input,adcCounts) ->  adcToVoltage input adcCounts ) )
         /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
         /// function and array of voltages for every block observed on the specified array of inputs in an
         /// acquisition.

@@ -228,7 +228,6 @@ module Signal =
             samplesObserved acquisition
             |> Event.map (fun samples -> samples.Samples |> Map.findArray inputs )
 
-
         /// Returns an observable which emits an array of 2-tuples for each block of samples observed on the
         /// specified input in an acquisition, where the first member is created by applying `map` to the array
         /// index, and the second is the type of the IObservable created by `primitive`.
@@ -237,7 +236,7 @@ module Signal =
             |> Observable.map (Array.mapi (fun i count -> (map i, count)))
 
         /// Generic to create an observable from an event fetched from the acquisition and a mapping to convert
-        /// that event into a different observable.
+//        /// that event into a different observable.
         let private createObservable event map input acquisition =
             event input acquisition
             |> Observable.map (Array.map map)
@@ -283,9 +282,18 @@ module Signal =
         /// observed on the specified array of inputs in an acquisition.
         let adcCountsByTime inputs acquisition = adcCountsBy (timeMap acquisition) inputs acquisition
 
+
         /// Returns an observable which emits an array of voltages for every block observed on the specified
         /// array of inputs in an acquisition.
-        let voltages inputs acquisition = createObservable adcCountsEvent (adcCountsToVoltages inputs (acquisitionParameters acquisition)) inputs acquisition
+        let voltages (inputs:(InputChannel*BufferDownsampling)[]) acquisition =
+
+            let adcToVoltage input data =
+                let toVoltage = adcCountToVoltage input (acquisitionParameters acquisition)
+                Array.map toVoltage data
+
+            adcCountsEvent inputs acquisition
+            |> Observable.map ( Array.zip inputs >> Array.map (fun (input,adcCounts) ->  adcToVoltage input adcCounts ) )
+
         /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
         /// function and array of voltages for every block observed on the specified array of inputs in an
         /// acquisition.
