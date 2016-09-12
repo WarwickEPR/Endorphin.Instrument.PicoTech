@@ -1,3 +1,6 @@
+#### 0.2.2 - 2016-09-12
+* Fix the end of sequence behaviour of block voltages with takeUntilFinished
+
 #### 0.2.1 - 2016-09-09
 * Fix the mapping of ADC count to voltage on multi-channel block acquisition
 
