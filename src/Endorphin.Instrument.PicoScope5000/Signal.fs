@@ -293,6 +293,7 @@ module Signal =
 
             adcCountsEvent inputs acquisition
             |> Observable.map ( Array.zip inputs >> Array.map (fun (input,adcCounts) ->  adcToVoltage input adcCounts ) )
+            |> takeUntilFinished acquisition
 
         /// Returns an observable which emits a tuple of sample index mapped with the given index mapping
         /// function and array of voltages for every block observed on the specified array of inputs in an
