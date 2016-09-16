@@ -1,3 +1,6 @@
+#### 0.2.3 - 2016-09-16
+* Add method of finding actual timebase in user-land code.
+
 #### 0.2.2 - 2016-09-12
 * Fix the end of sequence behaviour of block voltages with takeUntilFinished
 
