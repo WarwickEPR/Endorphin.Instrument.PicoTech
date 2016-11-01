@@ -55,6 +55,7 @@ module internal AcquisitionCommon =
             let acq = common acquisition
             acq.StatusChanged.Trigger (Next PreparingAcquisition)
             do! PicoScope.ChannelSettings.setAcquisitionInputChannels acq.PicoScope acq.Parameters.Inputs
+            do! PicoScope.Sampling.setResolution acq.PicoScope acq.Parameters.Resolution
 //            let toAdc = Trigger.thresholdToAdc acq.Parameters
             do! PicoScope.Triggering.setTriggerSettings acq.PicoScope acq.Parameters.Trigger }
 
