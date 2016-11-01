@@ -321,6 +321,13 @@ module PicoScope =
                        let! shorter = findShorterInterval upper known
                        return Choice.bindOrRaise shorter }
 
+        /// Get the actual timebase in use by the PicoScope for a requested sample interval.
+        /// Assumes saving into memory segment zero - more complicated use-cases will need a more
+        /// rigourous approach writing (it's my last day as I write this!).
+        let hardwareSampleInterval scope requested = async {
+            let! timebase = findTimebaseForSampleInterval scope MemorySegment.zero requested
+            return timebase.SampleInterval }
+
         /// Asynchronously segments the memory of a PicoScope 3000 series device into the specified
         /// number of segments.  Returns the number of samples which will fit in each new segment.
         let segmentMemory (PicoScope3000 picoScope) (numberOfSegments : MemorySegment) =
