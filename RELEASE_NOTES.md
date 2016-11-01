@@ -1,3 +1,6 @@
+#### 0.2.4 - 2016-11-01
+* Replace the missing setResolution call on the p5000
+
 #### 0.2.3 - 2016-09-16
 * Add method of finding actual timebase in user-land code.
 
