@@ -6,7 +6,7 @@ liable to change with little warning.
 
 Documentation:
 http://WarwickEPR.github.io/Endorphin.Instrument.PicoTech
-More documentation to follow...
+
 
 ## Maintainers
 
